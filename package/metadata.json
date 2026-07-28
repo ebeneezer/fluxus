@@ -1,0 +1,28 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "dr.michael.raus@gmail.com",
+                "Name": "Dr. Michael Raus",
+                "Website": "https://github.com/ebeneezer/fluxus"
+            }
+        ],
+        "BugReportUrl": "https://github.com/ebeneezer/fluxus/issues",
+        "Category": "System Information",
+        "Description": "An efficient GKrellM-style network bandwidth meter for Plasma 6",
+        "EnabledByDefault": true,
+        "FormFactors": [
+            "desktop",
+            "horizontal",
+            "vertical"
+        ],
+        "Icon": "fluxus",
+        "Id": "de.idoc.plasma.fluxus",
+        "License": "GPL-2.0-or-later",
+        "Name": "Fluxus",
+        "Version": "0.1.1",
+        "Website": "https://github.com/ebeneezer/fluxus"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0 http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
+  <kcfgfile name=""/>
+  <group name="General">
+    <entry name="networkInterface" type="String">
+      <label>Network interface to monitor.</label>
+      <default>all</default>
+    </entry>
+    <entry name="framesPerSecond" type="Double">
+      <label>Sampling and graph update rate.</label>
+      <default>1</default>
+      <min>0.2</min>
+      <max>30</max>
+    </entry>
+    <entry name="historySeconds" type="Int">
+      <label>Visible traffic history in seconds.</label>
+      <default>60</default>
+      <min>10</min>
+      <max>900</max>
+    </entry>
+    <entry name="panelLengthPercent" type="Int">
+      <label>Longitudinal panel size relative to the original Fluxus size.</label>
+      <default>100</default>
+      <min>50</min>
+      <max>1000</max>
+    </entry>
+    <entry name="splitDirections" type="Bool">
+      <label>Draw upload and download in separate graph halves.</label>
+      <default>false</default>
+    </entry>
+    <entry name="uploadInverted" type="Bool">
+      <label>Grow the upload graph downward.</label>
+      <default>true</default>
+    </entry>
+    <entry name="downloadInverted" type="Bool">
+      <label>Grow the download graph downward.</label>
+      <default>false</default>
+    </entry>
+    <entry name="uploadStyle" type="String">
+      <label>Upload graph style.</label>
+      <default>filled</default>
+    </entry>
+    <entry name="downloadStyle" type="String">
+      <label>Download graph style.</label>
+      <default>line</default>
+    </entry>
+    <entry name="gridMode" type="String">
+      <label>Horizontal grid mode: off, fixed line count, or automatic decade spacing.</label>
+      <default>auto</default>
+    </entry>
+    <entry name="gridLineCount" type="Int">
+      <label>Number of horizontal grid lines in fixed mode.</label>
+      <default>6</default>
+      <min>1</min>
+      <max>20</max>
+    </entry>
+    <entry name="showNumeric" type="Bool">
+      <label>Show automatically scaled numeric rates.</label>
+      <default>true</default>
+    </entry>
+    <entry name="numericPlacement" type="String">
+      <label>Place numeric rates in the graph or below the activity LEDs.</label>
+      <default>graph</default>
+    </entry>
+    <entry name="numericPosition" type="String">
+      <label>Corner containing the numeric rates.</label>
+      <default>topLeft</default>
+    </entry>
+    <entry name="numericFontFamily" type="String">
+      <label>Font family for numeric rates.</label>
+      <default>Monospace</default>
+    </entry>
+    <entry name="numericFontSize" type="Int">
+      <label>Maximum or fixed numeric font size.</label>
+      <default>15</default>
+      <min>6</min>
+      <max>72</max>
+    </entry>
+    <entry name="autoNumericFontSize" type="Bool">
+      <label>Fit numeric text into half of the graph width.</label>
+      <default>false</default>
+    </entry>
+    <entry name="showLeds" type="Bool">
+      <label>Show upload and download activity LEDs.</label>
+      <default>true</default>
+    </entry>
+    <entry name="showInterfaceName" type="Bool">
+      <label>Show the abbreviated network interface name.</label>
+      <default>true</default>
+    </entry>
+  </group>
+  <group name="Colors">
+    <entry name="backgroundColor" type="String"><default>#2D333C</default></entry>
+    <entry name="gridColor" type="String"><default>#171B1E</default></entry>
+    <entry name="uploadColor" type="String"><default>#BC8844</default></entry>
+    <entry name="downloadColor" type="String"><default>#00E6E6</default></entry>
+    <entry name="labelColor" type="String"><default>#FFFFFF</default></entry>
+  </group>
+</kcfg>

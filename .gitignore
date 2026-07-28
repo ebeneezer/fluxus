@@ -1,0 +1,7 @@
+/build/
+/build-release-x86_64/
+/dist/
+/store.kde.org/upload/
+*.user
+package/contents/imports/de/idoc/fluxus/backend/libfluxusbackendplugin.so
+package/contents/icons/fluxus.png
