@@ -45,9 +45,11 @@ https://github.com/ebeneezer/fluxus
 
 https://github.com/ebeneezer/fluxus/issues
 
-## Version 0.1.1
+## Version 0.1.2
 
 - Configurable upload and download traffic graph
 - Automatic numeric rate scaling
 - Full-width graph statistics with translucent text backgrounds
 - Horizontal, vertical, and desktop form-factor support
+- Selectable font weight with Normal as the default
+- Fixed panel width or height with orientation-aware sliders

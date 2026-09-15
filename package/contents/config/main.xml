@@ -26,6 +26,12 @@
       <min>50</min>
       <max>1000</max>
     </entry>
+    <entry name="panelLengthPixels" type="Int">
+      <label>Fixed panel length in logical pixels; zero uses proportional sizing.</label>
+      <default>0</default>
+      <min>0</min>
+      <max>2000</max>
+    </entry>
     <entry name="splitDirections" type="Bool">
       <label>Draw upload and download in separate graph halves.</label>
       <default>false</default>
@@ -77,6 +83,12 @@
       <default>15</default>
       <min>6</min>
       <max>72</max>
+    </entry>
+    <entry name="fontWeight" type="Int">
+      <label>Font weight for numeric rates and status labels.</label>
+      <default>400</default>
+      <min>300</min>
+      <max>700</max>
     </entry>
     <entry name="autoNumericFontSize" type="Bool">
       <label>Fit numeric text into half of the graph width.</label>

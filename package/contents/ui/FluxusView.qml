@@ -19,6 +19,7 @@ Item {
     readonly property color uploadColor: configuration.uploadColor || "#BC8844"
     readonly property color downloadColor: configuration.downloadColor || "#00E6E6"
     readonly property color labelColor: configuration.labelColor || "#FFFFFF"
+    readonly property int fontWeight: configuration.fontWeight || Font.Normal
     readonly property bool topReadout: (configuration.numericPosition || "topLeft").startsWith("top")
     readonly property bool leftReadout: (configuration.numericPosition || "topLeft").endsWith("Left")
     readonly property bool statisticsBelowLeds: configuration.showNumeric !== false
@@ -114,15 +115,14 @@ Item {
                         font.pixelSize: root.configuration.autoNumericFontSize === true
                             ? Math.max(6, Math.floor(graph.height * 0.24))
                             : Math.max(6, Math.min(72, root.configuration.numericFontSize || 15))
-                        font.bold: true
+                        font.weight: root.fontWeight
                         fontSizeMode: root.configuration.autoNumericFontSize === true
                             ? Text.HorizontalFit : Text.FixedSize
                         minimumPixelSize: 6
                         horizontalAlignment: root.leftReadout ? Text.AlignLeft : Text.AlignRight
                         elide: Text.ElideRight
                         maximumLineCount: 1
-                        style: Text.Outline
-                        styleColor: root.plotColor
+                        style: Text.Normal
                     }
                 }
             }
@@ -155,7 +155,7 @@ Item {
             font.pixelSize: root.statisticsBelowLeds
                 ? Math.max(7, Math.floor(height * 0.78))
                 : Math.max(8, Math.min(22, Math.floor(statusLine.height * 0.72)))
-            font.bold: true
+            font.weight: root.fontWeight
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             elide: Text.ElideMiddle
@@ -201,6 +201,7 @@ Item {
                 showLed: root.configuration.showLeds !== false
                 numericFontFamily: root.configuration.numericFontFamily || "Monospace"
                 numericFontSize: root.configuration.numericFontSize || 15
+                fontWeight: root.fontWeight
                 autoNumericFontSize: root.configuration.autoNumericFontSize === true
             }
 
@@ -215,6 +216,7 @@ Item {
                 showLed: root.configuration.showLeds !== false
                 numericFontFamily: root.configuration.numericFontFamily || "Monospace"
                 numericFontSize: root.configuration.numericFontSize || 15
+                fontWeight: root.fontWeight
                 autoNumericFontSize: root.configuration.autoNumericFontSize === true
             }
         }

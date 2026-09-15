@@ -63,17 +63,19 @@ PlasmoidItem {
             readonly property int fallbackHeight: 233
             readonly property real panelLengthFactor: Math.max(0.5, Math.min(10,
                 Number(Plasmoid.configuration.panelLengthPercent || 100) / 100))
+            readonly property int panelLengthPixels: Math.max(0, Math.min(2000,
+                Number(Plasmoid.configuration.panelLengthPixels || 0)))
             readonly property real horizontalPanelWidth: Math.max(48,
-                height * aspectRatio * panelLengthFactor)
+                panelLengthPixels > 0 ? panelLengthPixels : height * aspectRatio * panelLengthFactor)
             readonly property real verticalPanelHeight: Math.max(48,
-                width / aspectRatio * panelLengthFactor)
+                panelLengthPixels > 0 ? panelLengthPixels : width / aspectRatio * panelLengthFactor)
 
             Layout.fillWidth: verticalPanel
             Layout.fillHeight: horizontalPanel
-            Layout.minimumWidth: horizontalPanel ? horizontalPanelWidth : 96
+            Layout.minimumWidth: horizontalPanel ? horizontalPanelWidth : verticalPanel ? 0 : 96
             Layout.preferredWidth: horizontalPanel ? horizontalPanelWidth : fallbackWidth
             Layout.maximumWidth: horizontalPanel ? horizontalPanelWidth : Infinity
-            Layout.minimumHeight: verticalPanel ? verticalPanelHeight : 100
+            Layout.minimumHeight: verticalPanel ? verticalPanelHeight : horizontalPanel ? 0 : 100
             Layout.preferredHeight: verticalPanel ? verticalPanelHeight : fallbackHeight
             Layout.maximumHeight: verticalPanel ? verticalPanelHeight : Infinity
             implicitWidth: fallbackWidth

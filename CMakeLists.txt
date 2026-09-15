@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 
-project(fluxus VERSION 0.1.1 LANGUAGES CXX)
+project(fluxus VERSION 0.1.2 LANGUAGES CXX)
 
 configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/assets/fluxus-icon-256.png"

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2 — 2026-09-15
+
+- Add selectable font weights, defaulting to Normal, and remove text outlines.
+- Add fixed panel length in logical pixels with orientation-aware width and height sliders.
+- Let the panel control widget thickness in horizontal and vertical layouts.
+
 ## 0.1.1 — 2026-07-28
 
 - Add semi-transparent black backgrounds to the graph rate readouts.

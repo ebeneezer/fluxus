@@ -7,6 +7,9 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 
+import org.kde.plasma.core as PlasmaCore
+import org.kde.plasma.plasmoid
+
 import org.kde.kcmutils as KCM
 import org.kde.kirigami as Kirigami
 
@@ -15,10 +18,15 @@ import "../imports/de/idoc/fluxus/backend" as FluxusBackend
 KCM.SimpleKCM {
     id: root
 
+    readonly property bool horizontalPanel: Plasmoid.formFactor === PlasmaCore.Types.Horizontal
+    readonly property bool verticalPanel: Plasmoid.formFactor === PlasmaCore.Types.Vertical
+    readonly property bool inPanel: horizontalPanel || verticalPanel
+
     property string cfg_networkInterface: "all"
     property real cfg_framesPerSecond: 1
     property int cfg_historySeconds: 60
     property int cfg_panelLengthPercent: 100
+    property int cfg_panelLengthPixels: 0
     property bool cfg_splitDirections: false
     property bool cfg_uploadInverted: true
     property bool cfg_downloadInverted: false
@@ -31,6 +39,7 @@ KCM.SimpleKCM {
     property string cfg_numericPosition: "topLeft"
     property string cfg_numericFontFamily: "Monospace"
     property int cfg_numericFontSize: 15
+    property int cfg_fontWeight: Font.Normal
     property bool cfg_autoNumericFontSize: false
     property bool cfg_showLeds: true
     property bool cfg_showInterfaceName: true
@@ -39,6 +48,7 @@ KCM.SimpleKCM {
     property real cfg_framesPerSecondDefault: 1
     property int cfg_historySecondsDefault: 60
     property int cfg_panelLengthPercentDefault: 100
+    property int cfg_panelLengthPixelsDefault: 0
     property bool cfg_splitDirectionsDefault: false
     property bool cfg_uploadInvertedDefault: true
     property bool cfg_downloadInvertedDefault: false
@@ -51,6 +61,7 @@ KCM.SimpleKCM {
     property string cfg_numericPositionDefault: "topLeft"
     property string cfg_numericFontFamilyDefault: "Monospace"
     property int cfg_numericFontSizeDefault: 15
+    property int cfg_fontWeightDefault: Font.Normal
     property bool cfg_autoNumericFontSizeDefault: false
     property bool cfg_showLedsDefault: true
     property bool cfg_showInterfaceNameDefault: true
@@ -91,6 +102,12 @@ KCM.SimpleKCM {
         { rate: 30, text: i18n("30 fps") }
     ]
     readonly property var fontFamilies: Qt.fontFamilies().slice().sort((left, right) => left.localeCompare(right))
+    readonly property var fontWeightChoices: [
+        { text: i18n("Light"), value: Font.Light },
+        { text: i18n("Normal"), value: Font.Normal },
+        { text: i18n("Medium"), value: Font.Medium },
+        { text: i18n("Bold"), value: Font.Bold }
+    ]
 
     signal configurationChanged
 
@@ -200,8 +217,57 @@ KCM.SimpleKCM {
             onValueModified: { root.cfg_historySeconds = value; root.configurationChanged(); }
         }
 
+        QQC2.CheckBox {
+            Kirigami.FormData.label: i18n("Panel size:")
+            text: i18n("Fixed length")
+            enabled: root.inPanel
+            checked: root.cfg_panelLengthPixels > 0
+            onToggled: {
+                root.cfg_panelLengthPixels = checked ? 160 : 0;
+                root.configurationChanged();
+            }
+        }
+        Repeater {
+            model: [i18n("Width:"), i18n("Height:")]
+
+            RowLayout {
+                required property int index
+                required property string modelData
+                readonly property bool adjustable: index === 0 ? root.horizontalPanel : root.verticalPanel
+                Kirigami.FormData.label: modelData
+
+                QQC2.Slider {
+                    objectName: parent.index === 0 ? "panelWidthSlider" : "panelHeightSlider"
+                    Layout.fillWidth: true
+                    enabled: parent.adjustable && root.cfg_panelLengthPixels > 0
+                    from: 48
+                    to: 2000
+                    stepSize: 1
+                    value: root.cfg_panelLengthPixels || 160
+                    onMoved: {
+                        root.cfg_panelLengthPixels = Math.round(value);
+                        root.configurationChanged();
+                    }
+                }
+                QQC2.SpinBox {
+                    visible: parent.adjustable
+                    enabled: root.cfg_panelLengthPixels > 0
+                    from: 48
+                    to: 2000
+                    stepSize: 10
+                    value: root.cfg_panelLengthPixels || 160
+                    editable: true
+                    onValueModified: { root.cfg_panelLengthPixels = value; root.configurationChanged(); }
+                }
+                QQC2.Label {
+                    text: parent.adjustable ? i18n("px")
+                        : root.inPanel ? i18n("Controlled by panel") : i18n("Resize on desktop")
+                }
+            }
+        }
         QQC2.SpinBox {
-            Kirigami.FormData.label: i18n("Panel length:")
+            Kirigami.FormData.label: i18n("Proportional length:")
+            enabled: root.inPanel && root.cfg_panelLengthPixels === 0
             from: 50
             to: 1000
             stepSize: 10
@@ -324,6 +390,14 @@ KCM.SimpleKCM {
                     root.configurationChanged();
                 }
             }
+        }
+        QQC2.ComboBox {
+            Kirigami.FormData.label: i18n("Font weight:")
+            textRole: "text"
+            valueRole: "value"
+            model: root.fontWeightChoices
+            currentIndex: root.indexOfValue(root.fontWeightChoices, root.cfg_fontWeight)
+            onActivated: { root.cfg_fontWeight = currentValue; root.configurationChanged(); }
         }
         RowLayout {
             Kirigami.FormData.label: i18n("Numeric size:")

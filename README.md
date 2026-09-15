@@ -13,7 +13,8 @@ are drawn in cyan and amber on a dark, bevelled graph.
 - Configurable history window from 10 seconds to 15 minutes
 - Automatically scaled decimal `b`, `k`, `M`, and `G` bit-rate readouts
 - Full-width numeric readouts with text-sized translucent backgrounds
-- Searchable font selector, fixed font size, and automatic fit mode
+- Searchable font selector, selectable weight (Light through Bold), fixed font size, and automatic fit mode
+- Fixed panel width/height in logical pixels or proportional panel sizing
 - Optional fixed-count or automatically derived horizontal grid lines
 - Optional activity LEDs and interface label
 - Configurable colors, graph direction, and numeric placement
@@ -98,8 +99,16 @@ Build and install the source checkout with:
 ## Configuration
 
 Open the widget settings from the Plasma panel. Fluxus supports horizontal and
-vertical panels as well as desktop placement. The configured panel-length factor
-controls its longitudinal size without changing the graph's visual proportions.
+vertical panels as well as desktop placement. Enable **Panel size → Fixed length**
+to set the width in a horizontal panel or the height in a vertical panel
+(48–2000 logical pixels). The settings detect the panel orientation and enable
+only the applicable Width or Height slider. The panel controls the other dimension. With fixed
+length disabled, **Proportional length** scales the widget relative to the panel
+thickness (50–1000%). These settings do not affect desktop sizing.
+
+**Font weight** applies to numeric rates and status labels and defaults to Normal.
+Choose Light for thinner text; the available appearance depends on the selected
+font family. Numeric readouts use a translucent background without a text outline.
 
 ## Tests
 

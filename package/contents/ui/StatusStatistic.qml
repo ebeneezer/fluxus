@@ -17,6 +17,7 @@ Item {
     required property string numericFontFamily
     required property int numericFontSize
     required property bool autoNumericFontSize
+    property int fontWeight: Font.Normal
 
     Row {
         id: directionHeader
@@ -40,7 +41,7 @@ Item {
             color: root.labelColor
             font.family: "sans-serif"
             font.pixelSize: Math.max(7, Math.min(9, Math.floor(root.height * 0.34)))
-            font.bold: true
+            font.weight: root.fontWeight
         }
     }
 
@@ -55,7 +56,7 @@ Item {
         font.pixelSize: root.autoNumericFontSize
             ? Math.max(6, Math.floor(height * 0.92))
             : Math.max(6, Math.min(72, root.numericFontSize))
-        font.bold: true
+        font.weight: root.fontWeight
         fontSizeMode: root.autoNumericFontSize ? Text.HorizontalFit : Text.FixedSize
         minimumPixelSize: 6
         horizontalAlignment: Text.AlignHCenter
