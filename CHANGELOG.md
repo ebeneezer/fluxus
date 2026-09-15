@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0 — 2026-09-15
+
+- Add physical drive selection alongside network interfaces, including device model names.
+- Measure disk reads and writes from Linux block counters and display decimal byte/s units.
+- Adapt direction labels to the selected source and allow custom source labels.
+- Make activity LEDs substantially brighter, including at low traffic rates.
+- Reset rates and graph history when switching measurement sources.
+- Test disk counter parsing, unit conversion, missing devices and live source switching.
+
 ## 0.1.2 — 2026-09-15
 
 - Add selectable font weights, defaulting to Normal, and remove text outlines.

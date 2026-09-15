@@ -41,19 +41,19 @@ KCM.SimpleKCM {
             onColorEdited: value => { root.cfg_gridColor = value; root.configurationChanged(); }
         }
         ColorButton {
-            Kirigami.FormData.label: i18n("Upload:")
+            Kirigami.FormData.label: i18n("Upload / Write:")
             Layout.fillWidth: true
             selectedColor: root.cfg_uploadColor
             onColorEdited: value => { root.cfg_uploadColor = value; root.configurationChanged(); }
         }
         ColorButton {
-            Kirigami.FormData.label: i18n("Download:")
+            Kirigami.FormData.label: i18n("Download / Read:")
             Layout.fillWidth: true
             selectedColor: root.cfg_downloadColor
             onColorEdited: value => { root.cfg_downloadColor = value; root.configurationChanged(); }
         }
         ColorButton {
-            Kirigami.FormData.label: i18n("Interface label:")
+            Kirigami.FormData.label: i18n("Source label:")
             Layout.fillWidth: true
             selectedColor: root.cfg_labelColor
             onColorEdited: value => { root.cfg_labelColor = value; root.configurationChanged(); }

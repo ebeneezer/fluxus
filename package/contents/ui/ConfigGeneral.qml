@@ -22,6 +22,8 @@ KCM.SimpleKCM {
     readonly property bool verticalPanel: Plasmoid.formFactor === PlasmaCore.Types.Vertical
     readonly property bool inPanel: horizontalPanel || verticalPanel
 
+    readonly property bool diskSource: cfg_networkInterface.startsWith("disk:")
+    property string cfg_sourceLabel: ""
     property string cfg_networkInterface: "all"
     property real cfg_framesPerSecond: 1
     property int cfg_historySeconds: 60
@@ -44,6 +46,7 @@ KCM.SimpleKCM {
     property bool cfg_showLeds: true
     property bool cfg_showInterfaceName: true
 
+    property string cfg_sourceLabelDefault: ""
     property string cfg_networkInterfaceDefault: "all"
     property real cfg_framesPerSecondDefault: 1
     property int cfg_historySecondsDefault: 60
@@ -132,7 +135,7 @@ KCM.SimpleKCM {
     }
 
     function syncInterface() {
-        const index = interfaceCombo.find(cfg_networkInterface);
+        const index = interfaceCombo.indexOfValue(cfg_networkInterface);
         // Plasma injects cfg_* values asynchronously.  Do not replace a saved
         // interface with the first model entry while its value or the device
         // list is still arriving.
@@ -165,7 +168,14 @@ KCM.SimpleKCM {
         id: interfaceSource
         active: false
         Component.onCompleted: refreshInterfaces()
-        onInterfacesChanged: Qt.callLater(root.syncInterface)
+        onSourceChoicesChanged: Qt.callLater(root.syncInterface)
+    }
+
+    Timer {
+        interval: 5000
+        running: root.visible
+        repeat: true
+        onTriggered: interfaceSource.refreshInterfaces()
     }
 
     Kirigami.FormLayout {
@@ -173,15 +183,29 @@ KCM.SimpleKCM {
 
         QQC2.ComboBox {
             id: interfaceCombo
-            Kirigami.FormData.label: i18n("Network interface:")
-            model: interfaceSource.interfaces
-            textRole: ""
+            objectName: "measurementSourceCombo"
+            Kirigami.FormData.label: i18n("Measurement source:")
+            model: interfaceSource.sourceChoices.map(choice => ({
+                value: choice.value,
+                text: choice.kind === "disk" ? i18n("Drive: %1", choice.name)
+                    : choice.value === "all" ? i18n("Network: all interfaces")
+                    : i18n("Network: %1", choice.name)
+            }))
+            textRole: "text"
+            valueRole: "value"
             displayText: currentIndex >= 0 ? currentText : root.cfg_networkInterface
             onActivated: {
-                root.cfg_networkInterface = currentText;
+                root.cfg_networkInterface = currentValue;
                 root.configurationChanged();
             }
             Component.onCompleted: Qt.callLater(root.syncInterface)
+        }
+
+        QQC2.TextField {
+            Kirigami.FormData.label: i18n("Source label:")
+            placeholderText: i18n("Automatic device name")
+            text: root.cfg_sourceLabel
+            onTextEdited: { root.cfg_sourceLabel = text; root.configurationChanged(); }
         }
 
         RowLayout {
@@ -285,14 +309,14 @@ KCM.SimpleKCM {
 
         QQC2.CheckBox {
             Kirigami.FormData.label: i18n("Graph:")
-            text: i18n("Split upload and download")
+            text: root.diskSource ? i18n("Split reads and writes") : i18n("Split upload and download")
             checked: root.cfg_splitDirections
             onToggled: { root.cfg_splitDirections = checked; root.configurationChanged(); }
         }
 
         QQC2.ComboBox {
             id: uploadStyleCombo
-            Kirigami.FormData.label: i18n("Upload style:")
+            Kirigami.FormData.label: root.diskSource ? i18n("Write style:") : i18n("Upload style:")
             textRole: "text"
             valueRole: "value"
             model: root.styleChoices
@@ -300,14 +324,14 @@ KCM.SimpleKCM {
             onActivated: { root.cfg_uploadStyle = currentValue; root.configurationChanged(); }
         }
         QQC2.CheckBox {
-            text: i18n("Invert upload direction")
+            text: root.diskSource ? i18n("Invert write direction") : i18n("Invert upload direction")
             checked: root.cfg_uploadInverted
             onToggled: { root.cfg_uploadInverted = checked; root.configurationChanged(); }
         }
 
         QQC2.ComboBox {
             id: downloadStyleCombo
-            Kirigami.FormData.label: i18n("Download style:")
+            Kirigami.FormData.label: root.diskSource ? i18n("Read style:") : i18n("Download style:")
             textRole: "text"
             valueRole: "value"
             model: root.styleChoices
@@ -315,7 +339,7 @@ KCM.SimpleKCM {
             onActivated: { root.cfg_downloadStyle = currentValue; root.configurationChanged(); }
         }
         QQC2.CheckBox {
-            text: i18n("Invert download direction")
+            text: root.diskSource ? i18n("Invert read direction") : i18n("Invert download direction")
             checked: root.cfg_downloadInverted
             onToggled: { root.cfg_downloadInverted = checked; root.configurationChanged(); }
         }
@@ -346,7 +370,7 @@ KCM.SimpleKCM {
 
         QQC2.CheckBox {
             Kirigami.FormData.label: i18n("Readouts:")
-            text: i18n("Show numeric upload and download")
+            text: root.diskSource ? i18n("Show numeric reads and writes") : i18n("Show numeric upload and download")
             checked: root.cfg_showNumeric
             onToggled: { root.cfg_showNumeric = checked; root.configurationChanged(); }
         }
@@ -423,7 +447,7 @@ KCM.SimpleKCM {
             onToggled: { root.cfg_showLeds = checked; root.configurationChanged(); }
         }
         QQC2.CheckBox {
-            text: i18n("Show interface name")
+            text: i18n("Show source label")
             checked: root.cfg_showInterfaceName
             onToggled: { root.cfg_showInterfaceName = checked; root.configurationChanged(); }
         }

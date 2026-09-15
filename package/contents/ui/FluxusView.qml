@@ -7,12 +7,15 @@ import QtQuick
 import QtQuick.Layouts
 
 import "../imports/de/idoc/fluxus/backend" as FluxusBackend
+import "RateFormat.js" as RateFormat
 
 Item {
     id: root
 
     required property FluxusBackend.NetworkSource source
     required property var configuration
+
+    readonly property bool diskSource: source.diskSource
 
     readonly property color plotColor: configuration.backgroundColor || "#2D333C"
     readonly property color gridColor: configuration.gridColor || "#171B1E"
@@ -37,15 +40,7 @@ Item {
     implicitHeight: 233
 
     function formatRate(bytesPerSecond) {
-        let value = Math.max(0, Number(bytesPerSecond) || 0) * 8;
-        const units = ["b", "k", "M", "G"];
-        let unit = 0;
-        while (value >= 1000 && unit < units.length - 1) {
-            value /= 1000;
-            ++unit;
-        }
-        const decimals = value >= 100 || unit === 0 ? 0 : value >= 10 ? 1 : 2;
-        return value.toFixed(decimals) + " " + units[unit];
+        return RateFormat.format(bytesPerSecond, root.diskSource);
     }
 
     function ledIntensity(bytesPerSecond) {
@@ -149,7 +144,7 @@ Item {
                 ? (visible ? Math.max(8, Math.min(13, Math.floor(statusLine.height * 0.30))) : 0)
                 : statusLine.height
             visible: root.configuration.showInterfaceName !== false
-            text: root.source.interfaceName
+            text: String(root.configuration.sourceLabel || "").trim() || root.source.deviceName
             color: root.labelColor
             font.family: "sans-serif"
             font.pixelSize: root.statisticsBelowLeds
@@ -193,7 +188,7 @@ Item {
             StatusStatistic {
                 width: statusStatistics.width / 2
                 height: statusStatistics.height
-                directionName: "up"
+                directionName: root.diskSource ? "write" : "up"
                 directionColor: root.uploadColor
                 rateText: root.formatRate(root.source.uploadBytesPerSecond).replace(" ", "")
                 ledIntensity: root.ledIntensity(root.source.uploadBytesPerSecond)
@@ -208,7 +203,7 @@ Item {
             StatusStatistic {
                 width: statusStatistics.width / 2
                 height: statusStatistics.height
-                directionName: "down"
+                directionName: root.diskSource ? "read" : "down"
                 directionColor: root.downloadColor
                 rateText: root.formatRate(root.source.downloadBytesPerSecond).replace(" ", "")
                 ledIntensity: root.ledIntensity(root.source.downloadBytesPerSecond)

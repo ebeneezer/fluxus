@@ -1,12 +1,14 @@
 # Fluxus
 
-Fluxus is a low-overhead network bandwidth meter for KDE Plasma 6. Its compact
+Fluxus is a low-overhead network and disk throughput meter for KDE Plasma 6. Its compact
 design is inspired by the classic GKrellM monitor: incoming and outgoing traffic
 are drawn in cyan and amber on a dark, bevelled graph.
 
 ## Features
 
 - Selectable Linux network interface, including an aggregate `all` mode
+- Physical SSD/HDD read and write throughput with device model names in the source selector
+- Decimal disk throughput in B/s, kB/s, MB/s, GB/s or TB/s; custom source labels
 - Overlay or split upload/download graphs
 - Independent line, filled-area, or bar rendering
 - Configurable sampling rate from one frame every 5 seconds to 30 frames per second
@@ -22,6 +24,19 @@ are drawn in cyan and amber on a dark, bevelled graph.
 The `all` interface adds the counters of every non-loopback interface. On systems
 with VPNs, bridges, or containers, selecting the physical interface directly can
 avoid counting the same traffic at more than one network layer.
+
+Select **Measurement source → Drive: …** to monitor a whole physical drive.
+Cyan shows reads and amber shows writes. Disk throughput uses decimal bytes per
+second; network throughput retains its existing bit-rate units. Separate widget
+instances can monitor separate drives. **Source label** can identify them as
+SSD1 and SSD2. The source selector excludes partitions and virtual/stacked devices;
+the network `all` aggregate never includes disks.
+
+Drive sampling reads `/proc/diskstats` without elevated permissions and converts
+sector deltas using the kernel's fixed 512-byte accounting unit. It measures
+completed block I/O; application reads served from the page cache produce no disk
+read traffic. Device names are saved as `disk:DEVICE` in the existing
+`networkInterface` setting to preserve compatibility with network configurations.
 
 ## Binary Release
 
@@ -117,9 +132,15 @@ Build the backend before running the QML tests:
 ```sh
 QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software \
   /usr/lib/qt6/bin/qmltestrunner \
-  -input tests/tst_StatisticsOrder.qml \
+  -input tests \
   -import package/contents/imports \
   -o -,txt
+```
+
+Run the native disk counter parser tests with:
+
+```sh
+ctest --test-dir build-release-x86_64 --output-on-failure
 ```
 
 Additional visual and backend smoke fixtures are available under `tests/`.
@@ -141,7 +162,7 @@ code is included in the archive.
 ## Architecture
 
 QML implements the Plasma integration, configuration, and UI. A small Qt 6 plugin
-reads `/proc/net/dev` with `pread(2)` and renders the traffic history in one
+reads `/proc/net/dev` or `/proc/diskstats` with `pread(2)` and renders the traffic history in one
 `QQuickPaintedItem`. The sampler uses a fixed stack buffer; the renderer uses a
 bounded ring buffer and repaints only after a new sample.
 

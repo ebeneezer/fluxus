@@ -10,6 +10,7 @@ import org.kde.plasma.core as PlasmaCore
 import org.kde.plasma.plasmoid
 
 import "../imports/de/idoc/fluxus/backend" as FluxusBackend
+import "RateFormat.js" as RateFormat
 
 PlasmoidItem {
     id: root
@@ -24,21 +25,16 @@ PlasmoidItem {
     Plasmoid.backgroundHints: PlasmaCore.Types.NoBackground
     activationTogglesExpanded: false
     preferredRepresentation: compactRepresentation
-    toolTipMainText: i18n("Fluxus — %1", networkSource.interfaceName)
-    toolTipSubText: i18n("Download %1 · Upload %2",
-                          formatRate(networkSource.downloadBytesPerSecond),
-                          formatRate(networkSource.uploadBytesPerSecond))
+    toolTipMainText: i18n("Fluxus — %1", networkSource.deviceName)
+    toolTipSubText: !networkSource.valid ? networkSource.errorString
+        : networkSource.diskSource
+            ? i18n("Read %1 · Write %2", formatRate(networkSource.downloadBytesPerSecond),
+                    formatRate(networkSource.uploadBytesPerSecond))
+            : i18n("Download %1 · Upload %2", formatRate(networkSource.downloadBytesPerSecond),
+                    formatRate(networkSource.uploadBytesPerSecond))
 
     function formatRate(bytesPerSecond) {
-        let value = Math.max(0, Number(bytesPerSecond) || 0) * 8;
-        const units = ["b", "k", "M", "G"];
-        let unit = 0;
-        while (value >= 1000 && unit < units.length - 1) {
-            value /= 1000;
-            ++unit;
-        }
-        const decimals = value >= 100 || unit === 0 ? 0 : value >= 10 ? 1 : 2;
-        return value.toFixed(decimals) + " " + units[unit];
+        return RateFormat.format(bytesPerSecond, networkSource.diskSource);
     }
 
     FluxusBackend.NetworkSource {

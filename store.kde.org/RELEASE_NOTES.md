@@ -1,7 +1,8 @@
-# Fluxus 0.1.2
+# Fluxus 0.2.0
 
-- Selectable font weights from Light to Bold, with Normal as the default.
-- Cleaner numeric readouts without text outlines.
-- Fixed panel length in logical pixels, alongside proportional sizing.
-- Width and height sliders automatically follow panel orientation.
-- The panel controls widget thickness; Fluxus controls only its length.
+- Monitor physical SSDs and HDDs alongside network interfaces.
+- Select drives by device name and model in the measurement source dropdown.
+- Display disk reads and writes in decimal B/s, kB/s, MB/s, GB/s or TB/s.
+- Assign custom source labels, such as SSD1 and SSD2.
+- Brighter activity LEDs remain visible even at low traffic rates.
+- Network settings and orientation-aware panel sizing remain compatible.

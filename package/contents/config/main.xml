@@ -5,8 +5,12 @@
   <kcfgfile name=""/>
   <group name="General">
     <entry name="networkInterface" type="String">
-      <label>Network interface to monitor.</label>
+      <label>Measurement source: network interface, all, or disk:DEVICE.</label>
       <default>all</default>
+    </entry>
+    <entry name="sourceLabel" type="String">
+      <label>Optional label shown in place of the device name.</label>
+      <default></default>
     </entry>
     <entry name="framesPerSecond" type="Double">
       <label>Sampling and graph update rate.</label>

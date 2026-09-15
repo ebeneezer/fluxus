@@ -9,16 +9,30 @@ import "../package/contents/ui" as FluxusUi
 
 Window {
     id: window
-    width: 48
-    height: 20
+    width: 120
+    height: 40
     visible: true
     color: "#000000"
 
-    Row {
+    Column {
         anchors.centerIn: parent
-        spacing: 4
-        FluxusUi.LedIndicator { glowColor: "#BC8844"; intensity: 1 }
-        FluxusUi.LedIndicator { glowColor: "#00E6E6"; intensity: 0.8 }
+        spacing: 6
+        Repeater {
+            model: ["#BC8844", "#00E6E6"]
+            Row {
+                id: ledRow
+                required property string modelData
+                spacing: 8
+                Repeater {
+                    model: [0, 0.01, 0.25, 0.65, 1]
+                    FluxusUi.LedIndicator {
+                        required property real modelData
+                        glowColor: ledRow.modelData
+                        intensity: modelData
+                    }
+                }
+            }
+        }
     }
 
     Timer {

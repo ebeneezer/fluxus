@@ -79,7 +79,7 @@ private:
 
     static Style parseStyle(const QString &style);
     static QString styleName(Style style);
-    static double automaticCeiling(double observedMaximum);
+    double automaticCeiling(double observedMaximum) const;
     void appendSample(double download, double upload);
     void rebuildDisplayHistory(int columns);
     int desiredHistoryCapacity() const;

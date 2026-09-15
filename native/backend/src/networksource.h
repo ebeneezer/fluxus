@@ -10,6 +10,7 @@
 #include <QObject>
 #include <QStringList>
 #include <QTimer>
+#include <QVariantList>
 
 #include <cstdint>
 
@@ -20,6 +21,11 @@ class NetworkSource : public QObject
     Q_PROPERTY(QString interfaceName READ interfaceName WRITE setInterfaceName NOTIFY interfaceNameChanged)
     Q_PROPERTY(double framesPerSecond READ framesPerSecond WRITE setFramesPerSecond NOTIFY framesPerSecondChanged)
     Q_PROPERTY(bool active READ active WRITE setActive NOTIFY activeChanged)
+    // Keep the original QML API and saved interface IDs compatible. Drive
+    // sources use a disk: prefix and map reads/writes to the same two channels.
+    Q_PROPERTY(bool diskSource READ diskSource NOTIFY interfaceNameChanged)
+    Q_PROPERTY(QString deviceName READ deviceName NOTIFY interfaceNameChanged)
+    Q_PROPERTY(QVariantList sourceChoices READ sourceChoices NOTIFY sourceChoicesChanged)
     Q_PROPERTY(QStringList interfaces READ interfaces NOTIFY interfacesChanged)
     Q_PROPERTY(double downloadBytesPerSecond READ downloadBytesPerSecond NOTIFY ratesChanged)
     Q_PROPERTY(double uploadBytesPerSecond READ uploadBytesPerSecond NOTIFY ratesChanged)
@@ -40,6 +46,9 @@ public:
     void setActive(bool active);
 
     QStringList interfaces() const;
+    bool diskSource() const;
+    QString deviceName() const;
+    QVariantList sourceChoices() const;
     double downloadBytesPerSecond() const;
     double uploadBytesPerSecond() const;
     bool valid() const;
@@ -52,6 +61,7 @@ Q_SIGNALS:
     void framesPerSecondChanged();
     void activeChanged();
     void interfacesChanged();
+    void sourceChoicesChanged();
     void ratesChanged();
     void validChanged();
     void errorStringChanged();
@@ -67,8 +77,10 @@ private:
         bool found = false;
     };
 
-    bool ensureOpen();
-    Counters readCounters(QStringList *interfaceNames = nullptr);
+    bool ensureOpen(int &fd, const char *path);
+    Counters readCounters();
+    Counters readNetworkCounters(QStringList *interfaceNames = nullptr);
+    Counters readDiskCounters();
     void resetBaseline();
     void setRates(double downloadBytesPerSecond, double uploadBytesPerSecond);
     void setValid(bool valid);
@@ -79,6 +91,7 @@ private:
     QByteArray m_interfaceUtf8 = QByteArrayLiteral("all");
     double m_framesPerSecond = 1.0;
     bool m_active = false;
+    QVariantList m_sourceChoices;
     QStringList m_interfaces = { QStringLiteral("all") };
     double m_downloadBytesPerSecond = 0.0;
     double m_uploadBytesPerSecond = 0.0;
@@ -91,4 +104,5 @@ private:
     std::uint64_t m_previousTransmitted = 0;
     bool m_haveBaseline = false;
     int m_procFd = -1;
+    int m_diskFd = -1;
 };

@@ -4,6 +4,11 @@
 */
 
 #include "networksource.h"
+#include "diskstats.h"
+
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
 
 #include <algorithm>
 #include <array>
@@ -61,6 +66,9 @@ NetworkSource::~NetworkSource()
     if (m_procFd >= 0) {
         ::close(m_procFd);
     }
+    if (m_diskFd >= 0) {
+        ::close(m_diskFd);
+    }
 }
 
 QString NetworkSource::interfaceName() const
@@ -78,6 +86,9 @@ void NetworkSource::setInterfaceName(const QString &interfaceName)
     m_interfaceName = normalized;
     m_interfaceUtf8 = normalized.toUtf8();
     resetBaseline();
+    setRates(0.0, 0.0);
+    setValid(false);
+    setErrorString(QString());
     Q_EMIT interfaceNameChanged();
     if (m_active) {
         sample();
@@ -131,6 +142,21 @@ QStringList NetworkSource::interfaces() const
     return m_interfaces;
 }
 
+bool NetworkSource::diskSource() const
+{
+    return m_interfaceName.startsWith(QStringLiteral("disk:"));
+}
+
+QString NetworkSource::deviceName() const
+{
+    return diskSource() ? m_interfaceName.mid(5) : m_interfaceName;
+}
+
+QVariantList NetworkSource::sourceChoices() const
+{
+    return m_sourceChoices;
+}
+
 double NetworkSource::downloadBytesPerSecond() const
 {
     return m_downloadBytesPerSecond;
@@ -154,7 +180,7 @@ QString NetworkSource::errorString() const
 void NetworkSource::refreshInterfaces()
 {
     QStringList names;
-    readCounters(&names);
+    readNetworkCounters(&names);
     names.removeDuplicates();
     std::sort(names.begin(), names.end(), [](const QString &left, const QString &right) {
         return QString::localeAwareCompare(left, right) < 0;
@@ -165,35 +191,51 @@ void NetworkSource::refreshInterfaces()
         m_interfaces = names;
         Q_EMIT interfacesChanged();
     }
+    QVariantList choices;
+    for (const QString &name : m_interfaces) {
+        choices.append(QVariantMap {{QStringLiteral("value"), name},
+                                    {QStringLiteral("name"), name},
+                                    {QStringLiteral("kind"), QStringLiteral("network")}});
+    }
+    const QDir blockDevices(QStringLiteral("/sys/block"));
+    for (const QString &name : blockDevices.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name)) {
+        // Whole physical devices only: exclude partitions and stacked/virtual
+        // devices (dm, md, loop, zram) to avoid ambiguous duplicate accounting.
+        if (!QFileInfo::exists(blockDevices.filePath(name + QStringLiteral("/device")))) {
+            continue;
+        }
+        QFile modelFile(blockDevices.filePath(name + QStringLiteral("/device/model")));
+        QString model;
+        if (modelFile.open(QIODevice::ReadOnly)) {
+            model = QString::fromUtf8(modelFile.readAll()).trimmed();
+        }
+        choices.append(QVariantMap {{QStringLiteral("value"), QStringLiteral("disk:") + name},
+                                    {QStringLiteral("name"), model.isEmpty() ? name : name + QStringLiteral(" — ") + model},
+                                    {QStringLiteral("kind"), QStringLiteral("disk")}});
+    }
+    if (choices != m_sourceChoices) {
+        m_sourceChoices = choices;
+        Q_EMIT sourceChoicesChanged();
+    }
     m_interfaceClock.restart();
 }
 
 void NetworkSource::sample()
 {
-    QStringList interfaceNames;
-    QStringList *names = !m_interfaceClock.isValid() || m_interfaceClock.elapsed() >= 5000
-        ? &interfaceNames
-        : nullptr;
-    const Counters counters = readCounters(names);
-
-    if (names) {
-        interfaceNames.removeDuplicates();
-        std::sort(interfaceNames.begin(), interfaceNames.end(), [](const QString &left, const QString &right) {
-            return QString::localeAwareCompare(left, right) < 0;
-        });
-        interfaceNames.prepend(QStringLiteral("all"));
-        if (interfaceNames != m_interfaces) {
-            m_interfaces = interfaceNames;
-            Q_EMIT interfacesChanged();
-        }
-        m_interfaceClock.restart();
+    if (!m_interfaceClock.isValid() || m_interfaceClock.elapsed() >= 5000) {
+        refreshInterfaces();
     }
+    const Counters counters = readCounters();
 
     if (!counters.found) {
         resetBaseline();
         setRates(0.0, 0.0);
         setValid(false);
-        setErrorString(QStringLiteral("Network interface not found: %1").arg(m_interfaceName));
+        if (m_errorString.isEmpty()) {
+            setErrorString(diskSource()
+                ? QStringLiteral("Drive not found: %1").arg(deviceName())
+                : QStringLiteral("Network interface not found: %1").arg(m_interfaceName));
+        }
         Q_EMIT sampled(0.0, 0.0);
         return;
     }
@@ -233,25 +275,49 @@ void NetworkSource::sample()
     Q_EMIT sampled(download, upload);
 }
 
-bool NetworkSource::ensureOpen()
+bool NetworkSource::ensureOpen(int &fd, const char *path)
 {
-    if (m_procFd >= 0) {
+    if (fd >= 0) {
         return true;
     }
-
-    m_procFd = ::open("/proc/net/dev", O_RDONLY | O_CLOEXEC);
-    if (m_procFd < 0) {
-        setValid(false);
-        setErrorString(QStringLiteral("Cannot open /proc/net/dev"));
+    fd = ::open(path, O_RDONLY | O_CLOEXEC);
+    if (fd < 0) {
+        setErrorString(QStringLiteral("Cannot open %1").arg(QString::fromLatin1(path)));
         return false;
     }
     return true;
 }
 
-NetworkSource::Counters NetworkSource::readCounters(QStringList *interfaceNames)
+NetworkSource::Counters NetworkSource::readCounters()
+{
+    setErrorString(QString());
+    return diskSource() ? readDiskCounters() : readNetworkCounters();
+}
+
+NetworkSource::Counters NetworkSource::readDiskCounters()
+{
+    if (!ensureOpen(m_diskFd, "/proc/diskstats")) {
+        return {};
+    }
+    std::array<char, ProcBufferSize> buffer {};
+    const ssize_t length = ::pread(m_diskFd, buffer.data(), buffer.size(), 0);
+    if (length <= 0) {
+        ::close(m_diskFd);
+        m_diskFd = -1;
+        setErrorString(QStringLiteral("Cannot read /proc/diskstats"));
+        return {};
+    }
+    const QByteArray selected = deviceName().toUtf8();
+    const auto counters = Fluxus::parseDiskstats(
+        std::string_view(buffer.data(), static_cast<std::size_t>(length)),
+        std::string_view(selected.constData(), static_cast<std::size_t>(selected.size())));
+    return {counters.readBytes, counters.writeBytes, counters.found};
+}
+
+NetworkSource::Counters NetworkSource::readNetworkCounters(QStringList *interfaceNames)
 {
     Counters counters;
-    if (!ensureOpen()) {
+    if (!ensureOpen(m_procFd, "/proc/net/dev")) {
         return counters;
     }
 
@@ -317,7 +383,7 @@ NetworkSource::Counters NetworkSource::readCounters(QStringList *interfaceNames)
         counters.received += received;
         counters.transmitted += transmitted;
         counters.found = true;
-        if (!aggregate) {
+        if (!aggregate && !interfaceNames) {
             break;
         }
     }

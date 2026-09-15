@@ -274,15 +274,16 @@ QString TrafficGraph::styleName(Style style)
     return QStringLiteral("line");
 }
 
-double TrafficGraph::automaticCeiling(double observedMaximum)
+double TrafficGraph::automaticCeiling(double observedMaximum) const
 {
     if (!std::isfinite(observedMaximum) || observedMaximum <= 0.0) {
         return 1.0;
     }
-    const double bits = observedMaximum * 8.0;
-    const double decade = std::pow(10.0, std::floor(std::log10(bits)));
-    const double leadingDigit = std::max(1.0, std::floor(bits / decade));
-    return leadingDigit * decade / 8.0;
+    const double factor = m_source && m_source->diskSource() ? 1.0 : 8.0;
+    const double displayMaximum = observedMaximum * factor;
+    const double decade = std::pow(10.0, std::floor(std::log10(displayMaximum)));
+    const double leadingDigit = std::max(1.0, std::floor(displayMaximum / decade));
+    return leadingDigit * decade / factor;
 }
 
 void TrafficGraph::appendSample(double download, double upload)
@@ -394,9 +395,8 @@ void TrafficGraph::paintGrid(QPainter *painter, const QRectF &area, double obser
         return;
     }
 
-    // The readout is expressed in bits/s. At 779 bit/s the leading digit sets
-    // a 700 bit/s edge: 100..600 are internal and both borders remain implicit.
-    const double displayMaximum = observedMaximum * 8.0;
+    // Grid decades follow the readout unit: network bits/s or disk bytes/s.
+    const double displayMaximum = observedMaximum * (m_source && m_source->diskSource() ? 1.0 : 8.0);
     const double decade = std::pow(10.0, std::floor(std::log10(displayMaximum)));
     const double displayCeiling = std::floor(displayMaximum / decade) * decade;
     for (double marker = decade; marker < displayCeiling; marker += decade) {

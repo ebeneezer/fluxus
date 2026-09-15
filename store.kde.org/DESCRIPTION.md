@@ -1,12 +1,13 @@
 # Fluxus
 
-Fluxus is a compact, low-overhead network bandwidth meter for KDE Plasma 6.
+Fluxus is a compact, low-overhead network and disk throughput meter for KDE Plasma 6.
 Its visual design is inspired by the classic GKrellM monitor and works in
 horizontal panels, vertical panels, and on the desktop.
 
 ## Features
 
-- Live upload and download rates
+- Live upload/download or disk read/write rates
+- Physical SSD/HDD selection with model names and decimal byte/s readouts
 - Selectable Linux network interface or aggregate mode
 - Overlay or split-direction traffic graphs
 - Line, filled-area, and bar graph styles

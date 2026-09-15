@@ -10,7 +10,7 @@ Plasma 6 Widgets / System Information
 
 ## Summary
 
-A compact, low-overhead network bandwidth meter for KDE Plasma 6.
+A compact, low-overhead network and disk throughput meter for KDE Plasma 6.
 
 ## Description
 
@@ -45,7 +45,7 @@ https://github.com/ebeneezer/fluxus
 
 https://github.com/ebeneezer/fluxus/issues
 
-## Version 0.1.2
+## Version 0.2.0
 
 - Configurable upload and download traffic graph
 - Automatic numeric rate scaling
@@ -53,3 +53,6 @@ https://github.com/ebeneezer/fluxus/issues
 - Horizontal, vertical, and desktop form-factor support
 - Selectable font weight with Normal as the default
 - Fixed panel width or height with orientation-aware sliders
+
+- Physical drive read/write monitoring with decimal byte/s units
+- Brighter activity LEDs and optional source labels
