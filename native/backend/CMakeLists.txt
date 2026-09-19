@@ -15,6 +15,7 @@ add_library(fluxusbackendplugin MODULE
     src/networksource.cpp
     src/networksource.h
     src/diskstats.h
+    src/diskdevices.h
     src/trafficgraph.cpp
     src/trafficgraph.h
 )

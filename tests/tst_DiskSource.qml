@@ -48,6 +48,33 @@ TestCase {
         compare(source.errorString, "");
     }
 
+    function test_missingPersistentDevice() {
+        source.interfaceName = "disk:by-id/fluxus-nonexistent-test-id";
+        source.active = true;
+        verify(source.diskSource);
+        verify(!source.valid);
+        compare(source.deviceName, "");
+        compare(source.persistentInterfaceName, source.interfaceName);
+        verify(source.errorString.indexOf("fluxus-nonexistent-test-id") >= 0);
+    }
+
+    function test_legacyMigration() {
+        source.refreshInterfaces();
+        const drives = source.sourceChoices.filter(choice => choice.kind === "disk"
+            && choice.value.startsWith("disk:by-id/"));
+        if (!drives.length) { skip("No persistent drive IDs on this host"); return; }
+        for (const drive of drives) {
+            source.interfaceName = "disk:" + drive.device;
+            compare(source.persistentInterfaceName, drive.value);
+            source.active = true;
+            verify(source.valid, source.errorString);
+            source.interfaceName = source.persistentInterfaceName;
+            compare(source.deviceName, drive.device);
+            verify(source.valid, source.errorString);
+            source.active = false;
+        }
+    }
+
     function test_physicalDrives() {
         source.refreshInterfaces();
         const drives = source.sourceChoices.filter(choice => choice.kind === "disk");
@@ -57,7 +84,7 @@ TestCase {
             source.interfaceName = drive.value;
             verify(source.diskSource);
             verify(view.diskSource);
-            compare(source.deviceName, drive.value.slice(5));
+            compare(source.deviceName, drive.device);
             compare(view.formatRate(125000000), "125 MB/s");
             source.active = true;
             verify(source.valid, source.errorString);

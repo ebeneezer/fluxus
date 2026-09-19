@@ -24,7 +24,8 @@ class NetworkSource : public QObject
     // Keep the original QML API and saved interface IDs compatible. Drive
     // sources use a disk: prefix and map reads/writes to the same two channels.
     Q_PROPERTY(bool diskSource READ diskSource NOTIFY interfaceNameChanged)
-    Q_PROPERTY(QString deviceName READ deviceName NOTIFY interfaceNameChanged)
+    Q_PROPERTY(QString deviceName READ deviceName NOTIFY deviceNameChanged)
+    Q_PROPERTY(QString persistentInterfaceName READ persistentInterfaceName NOTIFY persistentInterfaceNameChanged)
     Q_PROPERTY(QVariantList sourceChoices READ sourceChoices NOTIFY sourceChoicesChanged)
     Q_PROPERTY(QStringList interfaces READ interfaces NOTIFY interfacesChanged)
     Q_PROPERTY(double downloadBytesPerSecond READ downloadBytesPerSecond NOTIFY ratesChanged)
@@ -48,6 +49,7 @@ public:
     QStringList interfaces() const;
     bool diskSource() const;
     QString deviceName() const;
+    QString persistentInterfaceName() const;
     QVariantList sourceChoices() const;
     double downloadBytesPerSecond() const;
     double uploadBytesPerSecond() const;
@@ -58,6 +60,8 @@ public:
 
 Q_SIGNALS:
     void interfaceNameChanged();
+    void deviceNameChanged();
+    void persistentInterfaceNameChanged();
     void framesPerSecondChanged();
     void activeChanged();
     void interfacesChanged();
@@ -88,6 +92,8 @@ private:
     void applyTimerInterval();
 
     QString m_interfaceName = QStringLiteral("all");
+    QString m_persistentInterfaceName = QStringLiteral("all");
+    QString m_diskDeviceName;
     QByteArray m_interfaceUtf8 = QByteArrayLiteral("all");
     double m_framesPerSecond = 1.0;
     bool m_active = false;

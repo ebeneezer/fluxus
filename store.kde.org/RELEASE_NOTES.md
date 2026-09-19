@@ -1,8 +1,8 @@
-# Fluxus 0.2.0
+# Fluxus 0.2.1
 
-- Monitor physical SSDs and HDDs alongside network interfaces.
-- Select drives by device name and model in the measurement source dropdown.
-- Display disk reads and writes in decimal B/s, kB/s, MB/s, GB/s or TB/s.
-- Assign custom source labels, such as SSD1 and SSD2.
-- Brighter activity LEDs remain visible even at low traffic rates.
-- Network settings and orientation-aware panel sizing remain compatible.
+- Keep each SSD widget attached to the same physical drive across reboots, even when Linux changes device numbers.
+- Save drive selections using persistent hardware IDs from `/dev/disk/by-id`.
+- Automatically migrate existing selections using the current drive mapping, preserving custom labels such as SSD1 and SSD2.
+- Sort the drive selector by model and persistent ID for a consistent order.
+- Report a missing drive as unavailable without silently switching to another drive.
+- Devices without persistent IDs remain selectable by their kernel device names.

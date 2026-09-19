@@ -135,7 +135,11 @@ KCM.SimpleKCM {
     }
 
     function syncInterface() {
-        const index = interfaceCombo.indexOfValue(cfg_networkInterface);
+        let index = interfaceCombo.indexOfValue(cfg_networkInterface);
+        if (index < 0 && cfg_networkInterface.startsWith("disk:")) {
+            index = interfaceSource.sourceChoices.findIndex(choice =>
+                choice.kind === "disk" && "disk:" + choice.device === cfg_networkInterface);
+        }
         // Plasma injects cfg_* values asynchronously.  Do not replace a saved
         // interface with the first model entry while its value or the device
         // list is still arriving.

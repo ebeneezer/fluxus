@@ -8,6 +8,7 @@ horizontal panels, vertical panels, and on the desktop.
 
 - Live upload/download or disk read/write rates
 - Physical SSD/HDD selection with model names and decimal byte/s readouts
+- Persistent drive selection across reboots and consistent sorting by model and hardware ID
 - Selectable Linux network interface or aggregate mode
 - Overlay or split-direction traffic graphs
 - Line, filled-area, and bar graph styles

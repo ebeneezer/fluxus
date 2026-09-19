@@ -5,10 +5,7 @@
 
 #include "networksource.h"
 #include "diskstats.h"
-
-#include <QDir>
-#include <QFile>
-#include <QFileInfo>
+#include "diskdevices.h"
 
 #include <algorithm>
 #include <array>
@@ -85,11 +82,14 @@ void NetworkSource::setInterfaceName(const QString &interfaceName)
 
     m_interfaceName = normalized;
     m_interfaceUtf8 = normalized.toUtf8();
+    m_persistentInterfaceName.clear();
     resetBaseline();
     setRates(0.0, 0.0);
     setValid(false);
     setErrorString(QString());
+    refreshInterfaces();
     Q_EMIT interfaceNameChanged();
+    Q_EMIT deviceNameChanged();
     if (m_active) {
         sample();
     }
@@ -149,7 +149,12 @@ bool NetworkSource::diskSource() const
 
 QString NetworkSource::deviceName() const
 {
-    return diskSource() ? m_interfaceName.mid(5) : m_interfaceName;
+    return diskSource() ? m_diskDeviceName : m_interfaceName;
+}
+
+QString NetworkSource::persistentInterfaceName() const
+{
+    return m_persistentInterfaceName;
 }
 
 QVariantList NetworkSource::sourceChoices() const
@@ -197,20 +202,13 @@ void NetworkSource::refreshInterfaces()
                                     {QStringLiteral("name"), name},
                                     {QStringLiteral("kind"), QStringLiteral("network")}});
     }
-    const QDir blockDevices(QStringLiteral("/sys/block"));
-    for (const QString &name : blockDevices.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name)) {
-        // Whole physical devices only: exclude partitions and stacked/virtual
-        // devices (dm, md, loop, zram) to avoid ambiguous duplicate accounting.
-        if (!QFileInfo::exists(blockDevices.filePath(name + QStringLiteral("/device")))) {
-            continue;
-        }
-        QFile modelFile(blockDevices.filePath(name + QStringLiteral("/device/model")));
-        QString model;
-        if (modelFile.open(QIODevice::ReadOnly)) {
-            model = QString::fromUtf8(modelFile.readAll()).trimmed();
-        }
-        choices.append(QVariantMap {{QStringLiteral("value"), QStringLiteral("disk:") + name},
-                                    {QStringLiteral("name"), model.isEmpty() ? name : name + QStringLiteral(" — ") + model},
+    const auto disks = Fluxus::diskDevices();
+    for (const auto &disk : disks) {
+        const QString id = disk.source.startsWith(QStringLiteral("disk:by-id/"))
+            ? disk.source.mid(11) : disk.device;
+        choices.append(QVariantMap {{QStringLiteral("value"), disk.source},
+                                    {QStringLiteral("name"), disk.model.isEmpty() ? id : disk.model + QStringLiteral(" — ") + id},
+                                    {QStringLiteral("device"), disk.device},
                                     {QStringLiteral("kind"), QStringLiteral("disk")}});
     }
     if (choices != m_sourceChoices) {
@@ -218,6 +216,20 @@ void NetworkSource::refreshInterfaces()
         Q_EMIT sourceChoicesChanged();
     }
     m_interfaceClock.restart();
+
+    const QString persistent = Fluxus::persistentDiskSource(
+        m_persistentInterfaceName.isEmpty() ? m_interfaceName : m_persistentInterfaceName, disks);
+    const QString device = diskSource() ? Fluxus::diskDeviceName(persistent) : QString();
+    if (device != m_diskDeviceName) {
+        m_diskDeviceName = device;
+        resetBaseline();
+        setRates(0.0, 0.0);
+        Q_EMIT deviceNameChanged();
+    }
+    if (persistent != m_persistentInterfaceName) {
+        m_persistentInterfaceName = persistent;
+        Q_EMIT persistentInterfaceNameChanged();
+    }
 }
 
 void NetworkSource::sample()
@@ -233,7 +245,7 @@ void NetworkSource::sample()
         setValid(false);
         if (m_errorString.isEmpty()) {
             setErrorString(diskSource()
-                ? QStringLiteral("Drive not found: %1").arg(deviceName())
+                ? QStringLiteral("Drive not found: %1").arg(m_persistentInterfaceName.mid(5))
                 : QStringLiteral("Network interface not found: %1").arg(m_interfaceName));
         }
         Q_EMIT sampled(0.0, 0.0);

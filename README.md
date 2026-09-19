@@ -8,6 +8,7 @@ are drawn in cyan and amber on a dark, bevelled graph.
 
 - Selectable Linux network interface, including an aggregate `all` mode
 - Physical SSD/HDD read and write throughput with device model names in the source selector
+- Persistent drive selection across reboots, with drives sorted by model and hardware ID
 - Decimal disk throughput in B/s, kB/s, MB/s, GB/s or TB/s; custom source labels
 - Overlay or split upload/download graphs
 - Independent line, filled-area, or bar rendering
@@ -35,8 +36,13 @@ the network `all` aggregate never includes disks.
 Drive sampling reads `/proc/diskstats` without elevated permissions and converts
 sector deltas using the kernel's fixed 512-byte accounting unit. It measures
 completed block I/O; application reads served from the page cache produce no disk
-read traffic. Device names are saved as `disk:DEVICE` in the existing
-`networkInterface` setting to preserve compatibility with network configurations.
+read traffic. Drive selections are saved as `disk:by-id/ID` in the existing
+`networkInterface` setting, using persistent hardware identifiers from
+`/dev/disk/by-id`. They follow the physical drive even if Linux assigns different
+device numbers on the next boot. The selector sorts drives by model and persistent
+ID. Legacy `disk:DEVICE` selections are migrated automatically using the current
+drive mapping; devices without a persistent ID retain the legacy format. A missing
+saved ID is reported as unavailable, without selecting another drive.
 
 ## Binary Release
 
@@ -137,7 +143,7 @@ QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software \
   -o -,txt
 ```
 
-Run the native disk counter parser tests with:
+Run the native disk counter parser and persistent drive selection tests with:
 
 ```sh
 ctest --test-dir build-release-x86_64 --output-on-failure

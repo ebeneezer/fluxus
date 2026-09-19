@@ -42,6 +42,15 @@ PlasmoidItem {
         interfaceName: root.configuredNetworkInterface
         framesPerSecond: Math.max(0.2, Math.min(30, Plasmoid.configuration.framesPerSecond || 1))
         active: root.visible
+        // Upgrade legacy kernel names while their current drive is available.
+        // Persist the identity so subsequent boots cannot select another SSD.
+        onPersistentInterfaceNameChanged: {
+            Qt.callLater(function() {
+                if (diskSource && interfaceName === root.configuredNetworkInterface
+                        && persistentInterfaceName !== root.configuredNetworkInterface)
+                    Plasmoid.configuration.networkInterface = persistentInterfaceName;
+            });
+        }
     }
 
     compactRepresentation: fluxusRepresentation

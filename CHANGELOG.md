@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1 — 2026-09-19
+
+- Keep SSD selections stable across reboots using persistent hardware IDs; migrate existing selections.
+- Sort drives by model and persistent ID instead of kernel enumeration order.
+- Report missing persistent drive IDs as unavailable instead of selecting another drive.
+- Test reversed kernel numbering, legacy selection migration, and missing drive IDs.
+
 ## 0.2.0 — 2026-09-15
 
 - Add physical drive selection alongside network interfaces, including device model names.

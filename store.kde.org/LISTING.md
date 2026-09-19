@@ -14,18 +14,21 @@ A compact, low-overhead network and disk throughput meter for KDE Plasma 6.
 
 ## Description
 
-Fluxus displays incoming and outgoing network traffic in a compact
-GKrellM-inspired graph. Upload and download can be overlaid or split, and the
+Fluxus displays incoming and outgoing network traffic or physical drive reads
+and writes in a compact GKrellM-inspired graph. The two directions can be overlaid or split, and the
 history, sampling rate, graph styles, directions, colors, numeric readouts,
 activity LEDs, and interface label are configurable.
 
-The release contains a native x86_64 Qt 6 backend that reads Linux network
-counters directly from `/proc/net/dev`. It is intended for Linux x86_64 systems
-running KDE Plasma 6.
+Drive selections use persistent hardware IDs to follow the same SSD or HDD across
+reboots. The source selector sorts drives by model and persistent ID.
+
+The release contains a native x86_64 Qt 6 backend that reads Linux network and
+disk counters directly from `/proc/net/dev` and `/proc/diskstats`. It is intended
+for Linux x86_64 systems running KDE Plasma 6.
 
 ## Tags
 
-network, bandwidth, traffic, upload, download, system monitor, Plasma 6, GKrellM
+network, bandwidth, traffic, upload, download, SSD, HDD, disk, system monitor, Plasma 6, GKrellM
 
 ## Requirements
 
@@ -45,14 +48,9 @@ https://github.com/ebeneezer/fluxus
 
 https://github.com/ebeneezer/fluxus/issues
 
-## Version 0.2.0
+## Version 0.2.1
 
-- Configurable upload and download traffic graph
-- Automatic numeric rate scaling
-- Full-width graph statistics with translucent text backgrounds
-- Horizontal, vertical, and desktop form-factor support
-- Selectable font weight with Normal as the default
-- Fixed panel width or height with orientation-aware sliders
-
-- Physical drive read/write monitoring with decimal byte/s units
-- Brighter activity LEDs and optional source labels
+- Stable SSD and HDD selections across reboots using persistent hardware IDs
+- Automatic migration of existing drive selections using the current drive mapping
+- Consistent drive ordering by model and persistent ID
+- Missing drives reported as unavailable without switching to another device
