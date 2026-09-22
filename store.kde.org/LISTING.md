@@ -48,9 +48,7 @@ https://github.com/ebeneezer/fluxus
 
 https://github.com/ebeneezer/fluxus/issues
 
-## Version 0.2.1
+## Version 0.2.2
 
-- Stable SSD and HDD selections across reboots using persistent hardware IDs
-- Automatic migration of existing drive selections using the current drive mapping
-- Consistent drive ordering by model and persistent ID
-- Missing drives reported as unavailable without switching to another device
+- KDE standard inner spacing in horizontal and vertical panels
+- Graphs and status labels kept inside widget frames

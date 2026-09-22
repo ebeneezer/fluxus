@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.2 — 2026-09-22
+
+- Add Kirigami standard inner spacing in horizontal and vertical panels so graphs and status labels clear widget frames.
+- Clip panel content to the inset drawing area.
+
 ## 0.2.1 — 2026-09-19
 
 - Keep SSD selections stable across reboots using persistent hardware IDs; migrate existing selections.
