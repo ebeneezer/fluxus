@@ -19,6 +19,9 @@ and writes in a compact GKrellM-inspired graph. The two directions can be overla
 history, sampling rate, graph styles, directions, colors, numeric readouts,
 activity LEDs, and interface label are configurable.
 
+Hover for a live enlarged preview, or click to keep it open. Both views share
+the complete history and use the same adjustable size.
+
 Drive selections use persistent hardware IDs to follow the same SSD or HDD across
 reboots. The source selector sorts drives by model and persistent ID.
 
@@ -48,7 +51,10 @@ https://github.com/ebeneezer/fluxus
 
 https://github.com/ebeneezer/fluxus/issues
 
-## Version 0.2.2
+## Version 0.3.0
 
-- KDE standard inner spacing in horizontal and vertical panels
-- Graphs and status labels kept inside widget frames
+- Live hover preview and pinned enlarged view with a Close button
+- Full shared history and native-resolution rendering with smooth curves
+- Shared preview size (150–600%) set in preferences or by dragging a corner
+- Screen-aware positioning and a subtle Fluxus watermark
+- Brief panel auto-hide delay after closing the preview

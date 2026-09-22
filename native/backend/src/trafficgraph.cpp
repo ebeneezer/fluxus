@@ -48,6 +48,36 @@ void TrafficGraph::setSource(NetworkSource *source)
     Q_EMIT sourceChanged();
 }
 
+TrafficGraph *TrafficGraph::historyGraph() const
+{
+    return m_historyGraph;
+}
+
+void TrafficGraph::setHistoryGraph(TrafficGraph *graph)
+{
+    // A preview borrows the original ring buffer, never another preview.
+    if (graph == m_historyGraph || graph == this || (graph && graph->historyGraph())) return;
+    disconnect(m_historyConnection);
+    disconnect(m_historyDestroyedConnection);
+    m_historyGraph = graph;
+    if (graph) {
+        m_history = graph->m_history;
+        m_historyConnection = connect(graph, &TrafficGraph::historyChanged, this, [this]() { update(); });
+        m_historyDestroyedConnection = connect(graph, &QObject::destroyed, this, [this]() {
+            m_historyGraph = nullptr;
+            m_history = std::make_shared<History>();
+            resizeHistory(desiredHistoryCapacity());
+            update();
+            Q_EMIT historyGraphChanged();
+        });
+    } else {
+        m_history = std::make_shared<History>();
+        resizeHistory(desiredHistoryCapacity());
+    }
+    update();
+    Q_EMIT historyGraphChanged();
+}
+
 int TrafficGraph::historySeconds() const
 {
     return m_historySeconds;
@@ -164,6 +194,7 @@ void TrafficGraph::setBackgroundColor(const QColor &value)
 {
     if (!value.isValid() || m_backgroundColor == value) return;
     m_backgroundColor = value;
+    setOpaquePainting(value.alpha() == 255);
     Q_EMIT appearanceChanged();
 }
 
@@ -247,14 +278,16 @@ void TrafficGraph::paint(QPainter *painter)
 
 void TrafficGraph::clear()
 {
-    m_head = 0;
-    m_count = 0;
-    std::fill(m_history.begin(), m_history.end(), Sample {});
+    if (m_historyGraph) return;
+    m_history->head = 0;
+    m_history->count = 0;
+    std::fill(m_history->samples.begin(), m_history->samples.end(), Sample {});
     std::fill(m_displayHistory.begin(), m_displayHistory.end(), Sample {});
     std::fill(m_displayPresent.begin(), m_displayPresent.end(), 0);
     m_cachedDownloadMaximum = 0.0;
     m_cachedUploadMaximum = 0.0;
     update();
+    Q_EMIT historyChanged();
 }
 
 TrafficGraph::Style TrafficGraph::parseStyle(const QString &style)
@@ -288,19 +321,21 @@ double TrafficGraph::automaticCeiling(double observedMaximum) const
 
 void TrafficGraph::appendSample(double download, double upload)
 {
-    if (m_history.isEmpty()) {
+    if (m_historyGraph) return;
+    if (m_history->samples.isEmpty()) {
         resizeHistory(desiredHistoryCapacity());
     }
-    if (m_history.isEmpty()) {
+    if (m_history->samples.isEmpty()) {
         return;
     }
-    m_history[m_head] = Sample {
+    m_history->samples[m_history->head] = Sample {
         static_cast<float>(std::max(0.0, download)),
         static_cast<float>(std::max(0.0, upload))
     };
-    m_head = (m_head + 1) % m_history.size();
-    m_count = std::min(m_count + 1, static_cast<int>(m_history.size()));
+    m_history->head = (m_history->head + 1) % m_history->samples.size();
+    m_history->count = std::min(m_history->count + 1, static_cast<int>(m_history->samples.size()));
     update();
+    Q_EMIT historyChanged();
 }
 
 void TrafficGraph::rebuildDisplayHistory(int columns)
@@ -314,15 +349,15 @@ void TrafficGraph::rebuildDisplayHistory(int columns)
     m_cachedDownloadMaximum = 0.0;
     m_cachedUploadMaximum = 0.0;
 
-    if (m_count <= 0 || m_history.size() < 2 || columns < 2) {
+    if (m_history->count <= 0 || m_history->samples.size() < 2 || columns < 2) {
         return;
     }
 
     const qint64 columnSpan = columns - 1;
-    const qint64 sampleSpan = m_history.size() - 1;
-    for (int index = 0; index < m_count; ++index) {
+    const qint64 sampleSpan = m_history->samples.size() - 1;
+    for (int index = 0; index < m_history->count; ++index) {
         const Sample sample = sampleAt(index);
-        const qint64 age = m_count - 1 - index;
+        const qint64 age = m_history->count - 1 - index;
         const int column = columns - 1 - static_cast<int>(age * columnSpan / sampleSpan);
         Sample &display = m_displayHistory[column];
         display.download = std::max(display.download, sample.download);
@@ -341,28 +376,30 @@ int TrafficGraph::desiredHistoryCapacity() const
 
 void TrafficGraph::resizeHistory(int capacity)
 {
+    if (m_historyGraph) return;
     capacity = std::max(2, capacity);
-    if (capacity == m_history.size()) {
+    if (capacity == m_history->samples.size()) {
         return;
     }
     QVector<Sample> resized(capacity);
-    const int retained = std::min(capacity, m_count);
-    const int first = m_count - retained;
+    const int retained = std::min(capacity, m_history->count);
+    const int first = m_history->count - retained;
     for (int index = 0; index < retained; ++index) {
         resized[index] = sampleAt(first + index);
     }
-    m_history = std::move(resized);
-    m_count = retained;
-    m_head = retained % capacity;
+    m_history->samples = std::move(resized);
+    m_history->count = retained;
+    m_history->head = retained % capacity;
+    Q_EMIT historyChanged();
 }
 
 TrafficGraph::Sample TrafficGraph::sampleAt(int chronologicalIndex) const
 {
-    if (chronologicalIndex < 0 || chronologicalIndex >= m_count || m_history.isEmpty()) {
+    if (chronologicalIndex < 0 || chronologicalIndex >= m_history->count || m_history->samples.isEmpty()) {
         return {};
     }
-    const int oldest = (m_head - m_count + m_history.size()) % m_history.size();
-    return m_history[(oldest + chronologicalIndex) % m_history.size()];
+    const int oldest = (m_history->head - m_history->count + m_history->samples.size()) % m_history->samples.size();
+    return m_history->samples[(oldest + chronologicalIndex) % m_history->samples.size()];
 }
 
 double TrafficGraph::maximum(bool upload) const
@@ -415,7 +452,7 @@ void TrafficGraph::paintGrid(QPainter *painter, const QRectF &area, double obser
 void TrafficGraph::paintDirection(QPainter *painter, const QRectF &area, bool upload, bool inverted,
                                   Style style, const QColor &color, double ceiling)
 {
-    if (m_count <= 0 || m_displayHistory.isEmpty() || area.width() <= 1.0
+    if (m_history->count <= 0 || m_displayHistory.isEmpty() || area.width() <= 1.0
             || area.height() <= 1.0 || ceiling <= 0.0) {
         return;
     }
@@ -448,6 +485,7 @@ void TrafficGraph::paintDirection(QPainter *painter, const QRectF &area, bool up
     painter->save();
     painter->setClipRect(area);
     if (style == Style::Filled) {
+        painter->setRenderHint(QPainter::Antialiasing, antialiasing());
         m_fillPolygon.clear();
         m_fillPolygon.reserve(columns + 2);
         m_fillPolygon.append(QPointF(pointFor(firstColumn).x(), baseline));
@@ -472,6 +510,7 @@ void TrafficGraph::paintDirection(QPainter *painter, const QRectF &area, bool up
             painter->drawLine(QPointF(point.x(), baseline), point);
         }
     } else {
+        painter->setRenderHint(QPainter::Antialiasing, antialiasing());
         painter->setPen(QPen(color, 2.0));
         QPointF previous;
         bool havePrevious = false;

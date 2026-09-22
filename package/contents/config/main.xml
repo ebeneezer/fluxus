@@ -36,6 +36,12 @@
       <min>0</min>
       <max>2000</max>
     </entry>
+    <entry name="previewScalePercent" type="Int">
+      <label>Shared magnification for hover preview and pinned view.</label>
+      <default>300</default>
+      <min>150</min>
+      <max>600</max>
+    </entry>
     <entry name="splitDirections" type="Bool">
       <label>Draw upload and download in separate graph halves.</label>
       <default>false</default>

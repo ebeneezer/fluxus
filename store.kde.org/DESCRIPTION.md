@@ -17,6 +17,9 @@ horizontal panels, vertical panels, and on the desktop.
 - Readable numeric rates with configurable font and placement
 - Optional upload/download activity LEDs
 - Configurable colors and panel length
+- Live hover preview and pinned enlarged view with shared history
+- Native-resolution enlarged graphs with a subtle Fluxus watermark
+- Shared preview size (150–600%) with slider, numeric field, and corner resizing
 
 ## Requirements
 

@@ -21,7 +21,7 @@
         "Id": "de.idoc.plasma.fluxus",
         "License": "GPL-2.0-or-later",
         "Name": "Fluxus",
-        "Version": "0.2.2",
+        "Version": "0.3.0",
         "Website": "https://github.com/ebeneezer/fluxus"
     },
     "X-Plasma-API-Minimum-Version": "6.0"

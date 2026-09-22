@@ -29,6 +29,7 @@ KCM.SimpleKCM {
     property int cfg_historySeconds: 60
     property int cfg_panelLengthPercent: 100
     property int cfg_panelLengthPixels: 0
+    property int cfg_previewScalePercent: 300
     property bool cfg_splitDirections: false
     property bool cfg_uploadInverted: true
     property bool cfg_downloadInverted: false
@@ -52,6 +53,7 @@ KCM.SimpleKCM {
     property int cfg_historySecondsDefault: 60
     property int cfg_panelLengthPercentDefault: 100
     property int cfg_panelLengthPixelsDefault: 0
+    property int cfg_previewScalePercentDefault: 300
     property bool cfg_splitDirectionsDefault: false
     property bool cfg_uploadInvertedDefault: true
     property bool cfg_downloadInvertedDefault: false
@@ -243,6 +245,34 @@ KCM.SimpleKCM {
             textFromValue: function(value, locale) { return root.durationText(value); }
             valueFromText: function(text, locale) { return root.durationValue(text); }
             onValueModified: { root.cfg_historySeconds = value; root.configurationChanged(); }
+        }
+
+        RowLayout {
+            Kirigami.FormData.label: i18n("Preview size:")
+            QQC2.Slider {
+                objectName: "previewSizeSlider"
+                Layout.fillWidth: true
+                from: 150
+                to: 600
+                stepSize: 1
+                value: root.cfg_previewScalePercent
+                onMoved: {
+                    root.cfg_previewScalePercent = Math.round(value);
+                    root.configurationChanged();
+                }
+            }
+            QQC2.SpinBox {
+                objectName: "previewSizeSpinBox"
+                from: 150
+                to: 600
+                value: root.cfg_previewScalePercent
+                editable: true
+                onValueModified: {
+                    root.cfg_previewScalePercent = value;
+                    root.configurationChanged();
+                }
+            }
+            QQC2.Label { text: "%" }
         }
 
         QQC2.CheckBox {

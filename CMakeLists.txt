@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 
-project(fluxus VERSION 0.2.2 LANGUAGES CXX)
+project(fluxus VERSION 0.3.0 LANGUAGES CXX)
 
 include(CTest)
 
@@ -21,4 +21,13 @@ if(BUILD_TESTING)
     target_compile_features(test_diskdevices PRIVATE cxx_std_20)
     target_link_libraries(test_diskdevices PRIVATE Qt6::Core)
     add_test(NAME diskdevices COMMAND test_diskdevices)
+    find_package(Qt6 REQUIRED COMPONENTS Gui Qml Quick)
+    add_executable(test_graphpreview tests/test_graphpreview.cpp
+        native/backend/src/trafficgraph.cpp native/backend/src/trafficgraph.h
+        native/backend/src/networksource.cpp native/backend/src/networksource.h)
+    set_target_properties(test_graphpreview PROPERTIES AUTOMOC ON)
+    target_compile_features(test_graphpreview PRIVATE cxx_std_20)
+    target_link_libraries(test_graphpreview PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Quick)
+    add_test(NAME graphpreview COMMAND test_graphpreview)
+    set_tests_properties(graphpreview PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 endif()

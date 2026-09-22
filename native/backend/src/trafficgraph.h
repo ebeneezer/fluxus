@@ -12,12 +12,14 @@
 #include <QPolygonF>
 #include <QQuickPaintedItem>
 #include <QVector>
+#include <memory>
 
 class TrafficGraph : public QQuickPaintedItem
 {
     Q_OBJECT
 
     Q_PROPERTY(NetworkSource *source READ source WRITE setSource NOTIFY sourceChanged)
+    Q_PROPERTY(TrafficGraph *historyGraph READ historyGraph WRITE setHistoryGraph NOTIFY historyGraphChanged)
     Q_PROPERTY(int historySeconds READ historySeconds WRITE setHistorySeconds NOTIFY historySecondsChanged)
     Q_PROPERTY(bool splitDirections READ splitDirections WRITE setSplitDirections NOTIFY appearanceChanged)
     Q_PROPERTY(bool uploadInverted READ uploadInverted WRITE setUploadInverted NOTIFY appearanceChanged)
@@ -36,6 +38,8 @@ public:
 
     NetworkSource *source() const;
     void setSource(NetworkSource *source);
+    TrafficGraph *historyGraph() const;
+    void setHistoryGraph(TrafficGraph *graph);
     int historySeconds() const;
     void setHistorySeconds(int historySeconds);
 
@@ -67,6 +71,8 @@ public:
 
 Q_SIGNALS:
     void sourceChanged();
+    void historyGraphChanged();
+    void historyChanged();
     void historySecondsChanged();
     void appearanceChanged();
 
@@ -75,6 +81,12 @@ private:
     struct Sample {
         float download = 0.0F;
         float upload = 0.0F;
+    };
+
+    struct History {
+        QVector<Sample> samples;
+        int head = 0;
+        int count = 0;
     };
 
     static Style parseStyle(const QString &style);
@@ -94,12 +106,13 @@ private:
     QMetaObject::Connection m_sampleConnection;
     QMetaObject::Connection m_interfaceConnection;
     QMetaObject::Connection m_rateConnection;
-    QVector<Sample> m_history;
+    std::shared_ptr<History> m_history = std::make_shared<History>();
+    QPointer<TrafficGraph> m_historyGraph;
+    QMetaObject::Connection m_historyConnection;
+    QMetaObject::Connection m_historyDestroyedConnection;
     QVector<Sample> m_displayHistory;
     QVector<quint8> m_displayPresent;
     QPolygonF m_fillPolygon;
-    int m_head = 0;
-    int m_count = 0;
     int m_historySeconds = 60;
     double m_cachedDownloadMaximum = 0.0;
     double m_cachedUploadMaximum = 0.0;

@@ -21,6 +21,7 @@ are drawn in cyan and amber on a dark, bevelled graph.
 - Optional fixed-count or automatically derived horizontal grid lines
 - Optional activity LEDs and interface label
 - Configurable colors, graph direction, and numeric placement
+- Live hover preview and pinned enlarged view, with shared size and full history
 
 The `all` interface adds the counters of every non-loopback interface. On systems
 with VPNs, bridges, or containers, selecting the physical interface directly can
@@ -45,6 +46,9 @@ drive mapping; devices without a persistent ID retain the legacy format. A missi
 saved ID is reported as unavailable, without selecting another drive.
 
 ## Binary Release
+
+Download [Fluxus 0.3.0 for Plasma 6 / Linux x86_64](dist/fluxus-0.3.0-plasma6-linux-x86_64.tar.bz2)
+and its [SHA-256 checksum](dist/fluxus-0.3.0-plasma6-linux-x86_64.tar.bz2.sha256).
 
 The store archive is built for:
 
@@ -130,6 +134,18 @@ thickness (50–1000%). These settings do not affect desktop sizing.
 **Font weight** applies to numeric rates and status labels and defaults to Normal.
 Choose Light for thinner text; the available appearance depends on the selected
 font family. Numeric readouts use a translucent background without a text outline.
+
+Hover over Fluxus to open a live enlarged preview. Click the widget to keep that
+same window open until its Close button is pressed. **Preview size** sets the
+shared magnification (150–600%) using a slider or numeric field. Drag the marked
+corner of the pinned window to change and save the same setting. Both modes use
+identical dimensions, bounded by the available screen area. The preview shares
+the miniature's complete history, colors, directions and display settings, and
+draws the samples afresh at its actual size. Curves use the larger pixel grid;
+strokes, text and LEDs are rendered without a magnifying transform. A subtle
+Fluxus watermark sits behind the enlarged graph. After pressing Close, the panel
+stays available for up to 1.5 seconds while the pointer returns, then resumes its
+configured auto-hide behavior.
 
 ## Tests
 

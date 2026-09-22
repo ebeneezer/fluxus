@@ -11,7 +11,6 @@ import org.kde.plasma.core as PlasmaCore
 import org.kde.plasma.plasmoid
 
 import "../imports/de/idoc/fluxus/backend" as FluxusBackend
-import "RateFormat.js" as RateFormat
 
 PlasmoidItem {
     id: root
@@ -26,23 +25,21 @@ PlasmoidItem {
     Plasmoid.backgroundHints: PlasmaCore.Types.NoBackground
     activationTogglesExpanded: false
     preferredRepresentation: compactRepresentation
-    toolTipMainText: i18n("Fluxus — %1", networkSource.deviceName)
-    toolTipSubText: !networkSource.valid ? networkSource.errorString
-        : networkSource.diskSource
-            ? i18n("Read %1 · Write %2", formatRate(networkSource.downloadBytesPerSecond),
-                    formatRate(networkSource.uploadBytesPerSecond))
-            : i18n("Download %1 · Upload %2", formatRate(networkSource.downloadBytesPerSecond),
-                    formatRate(networkSource.uploadBytesPerSecond))
-
-    function formatRate(bytesPerSecond) {
-        return RateFormat.format(bytesPerSecond, networkSource.diskSource);
-    }
+    // The graph preview replaces Plasma's textual tooltip.
+    toolTipMainText: ""
+    toolTipSubText: ""
+    toolTipTextFormat: Text.PlainText
+    property var activePreview: null
+    Plasmoid.status: activePreview !== null && activePreview.keepPanelOpen
+        && (Plasmoid.formFactor === PlasmaCore.Types.Horizontal
+            || Plasmoid.formFactor === PlasmaCore.Types.Vertical)
+        ? PlasmaCore.Types.RequiresAttentionStatus : PlasmaCore.Types.ActiveStatus
 
     FluxusBackend.NetworkSource {
         id: networkSource
         interfaceName: root.configuredNetworkInterface
         framesPerSecond: Math.max(0.2, Math.min(30, Plasmoid.configuration.framesPerSecond || 1))
-        active: root.visible
+        active: root.visible || (root.activePreview !== null && root.activePreview.opened)
         // Upgrade legacy kernel names while their current drive is available.
         // Persist the identity so subsequent boots cannot select another SSD.
         onPersistentInterfaceNameChanged: {
@@ -89,6 +86,7 @@ PlasmoidItem {
             clip: true
 
             FluxusView {
+                id: miniature
                 anchors.fill: parent
                 // Panel margins belong to the containment; keep our painted
                 // content inset as well so it clears the widget's frame.
@@ -97,6 +95,29 @@ PlasmoidItem {
                 clip: true
                 source: networkSource
                 configuration: Plasmoid.configuration
+            }
+
+            HoverHandler {
+                id: hover
+            }
+
+            TapHandler {
+                acceptedButtons: Qt.LeftButton
+                onTapped: preview.pin()
+            }
+
+            GraphPreview {
+                id: preview
+                miniature: miniature
+                configuration: Plasmoid.configuration
+                location: Plasmoid.location
+                hovered: hover.hovered
+                onOpenedChanged: {
+                    if (opened) root.activePreview = preview;
+                }
+                Component.onDestruction: {
+                    if (root.activePreview === preview) root.activePreview = null;
+                }
             }
         }
     }

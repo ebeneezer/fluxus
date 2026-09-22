@@ -15,6 +15,10 @@ Item {
     required property FluxusBackend.NetworkSource source
     required property var configuration
 
+    // Share samples, but lay out and paint each view at its actual size.
+    property FluxusBackend.TrafficGraph historyGraph: null
+    readonly property alias trafficGraph: graph
+
     readonly property bool diskSource: source.diskSource
 
     readonly property color plotColor: configuration.backgroundColor || "#2D333C"
@@ -48,6 +52,24 @@ Item {
         return Math.min(1, Math.log2(1 + bits) / 22);
     }
 
+    Rectangle {
+        anchors.fill: graph
+        color: root.plotColor
+        visible: root.historyGraph !== null
+    }
+
+    Image {
+        anchors.fill: graph
+        anchors.margins: 4
+        source: root.historyGraph !== null ? "../icons/fluxus.png" : ""
+        fillMode: Image.PreserveAspectFit
+        horizontalAlignment: Image.AlignHCenter
+        verticalAlignment: Image.AlignVCenter
+        opacity: 0.10
+        smooth: true
+        mipmap: true
+    }
+
     FluxusBackend.TrafficGraph {
         id: graph
         anchors.left: parent.left
@@ -55,6 +77,8 @@ Item {
         anchors.top: parent.top
         anchors.bottom: statusLine.top
         source: root.source
+        historyGraph: root.historyGraph
+        antialiasing: root.historyGraph !== null
         historySeconds: root.configuration.historySeconds || 60
         splitDirections: root.splitDirections
         uploadInverted: root.uploadInverted
@@ -63,7 +87,7 @@ Item {
         downloadStyle: root.configuration.downloadStyle || "line"
         gridMode: root.configuration.gridMode || "auto"
         gridLineCount: root.configuration.gridLineCount || 6
-        backgroundColor: root.plotColor
+        backgroundColor: root.historyGraph !== null ? "transparent" : root.plotColor
         gridColor: root.gridColor
         uploadColor: root.uploadColor
         downloadColor: root.downloadColor
