@@ -6,6 +6,7 @@
 import QtQuick
 import QtQuick.Layouts
 
+import org.kde.kirigami as Kirigami
 import org.kde.plasma.core as PlasmaCore
 import org.kde.plasma.plasmoid
 
@@ -89,6 +90,11 @@ PlasmoidItem {
 
             FluxusView {
                 anchors.fill: parent
+                // Panel margins belong to the containment; keep our painted
+                // content inset as well so it clears the widget's frame.
+                anchors.margins: representation.horizontalPanel || representation.verticalPanel
+                    ? Kirigami.Units.smallSpacing : 0
+                clip: true
                 source: networkSource
                 configuration: Plasmoid.configuration
             }
