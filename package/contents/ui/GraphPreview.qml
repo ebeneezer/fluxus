@@ -4,6 +4,7 @@
 */
 
 import QtQuick
+import QtQuick.Layouts
 import QtQuick.Window
 import QtQuick.Controls as QQC2
 import org.kde.kirigami as Kirigami
@@ -21,10 +22,22 @@ Item {
     property bool suppressed: false
     readonly property bool opened: dialog.visible
     readonly property bool keepPanelOpen: opened || closeGrace.running
-    readonly property real previewScale: Math.max(0.1, Math.min(
-        Math.max(150, Math.min(600, configuration.previewScalePercent || 300)) / 100,
-        (miniature.Screen.desktopAvailableWidth - 80) / Math.max(1, miniature.width),
-        (miniature.Screen.desktopAvailableHeight - 112) / Math.max(1, miniature.height)))
+    readonly property real miniatureWidth: miniature.width > 0 ? miniature.width : miniature.implicitWidth
+    readonly property real miniatureHeight: miniature.height > 0 ? miniature.height : miniature.implicitHeight
+    readonly property real previewScale: calculatePreviewScale(
+        miniature.Screen.desktopAvailableWidth, miniature.Screen.desktopAvailableHeight)
+
+    function calculatePreviewScale(availableWidth, availableHeight) {
+        let scale = Math.max(150, Math.min(600,
+            Number(configuration.previewScalePercent) || 300)) / 100;
+        // The attached Screen values can be unavailable while Plasma creates
+        // the panel item. Never let an invalid screen size collapse the popup.
+        if (Number.isFinite(availableWidth) && availableWidth > 80)
+            scale = Math.min(scale, (availableWidth - 80) / Math.max(1, miniatureWidth));
+        if (Number.isFinite(availableHeight) && availableHeight > 112)
+            scale = Math.min(scale, (availableHeight - 112) / Math.max(1, miniatureHeight));
+        return Math.max(0.1, scale);
+    }
 
     function pin() {
         showTimer.stop();
@@ -96,8 +109,18 @@ Item {
             id: content
             readonly property int padding: 8
             readonly property int headerHeight: 32
-            width: Math.ceil(root.miniature.width * root.previewScale) + padding * 2
-            height: Math.ceil(root.miniature.height * root.previewScale) + padding * 2 + headerHeight
+            readonly property int targetWidth: Math.ceil(root.miniatureWidth * root.previewScale) + padding * 2
+            readonly property int targetHeight: Math.ceil(root.miniatureHeight * root.previewScale) + padding * 2 + headerHeight
+            width: targetWidth
+            height: targetHeight
+            // Plasma can resize mainItem after a window geometry event. Fixed
+            // layout hints prevent a one-pixel resize loop from collapsing it.
+            Layout.minimumWidth: targetWidth
+            Layout.preferredWidth: targetWidth
+            Layout.maximumWidth: targetWidth
+            Layout.minimumHeight: targetHeight
+            Layout.preferredHeight: targetHeight
+            Layout.maximumHeight: targetHeight
 
             HoverHandler {
                 id: popupHover
@@ -142,8 +165,8 @@ Item {
                 active: dialog.visible
                 sourceComponent: FluxusView {
                     objectName: "previewView"
-                    width: Math.ceil(root.miniature.width * root.previewScale)
-                    height: Math.ceil(root.miniature.height * root.previewScale)
+                    width: Math.ceil(root.miniatureWidth * root.previewScale)
+                    height: Math.ceil(root.miniatureHeight * root.previewScale)
                     source: root.miniature.source
                     configuration: root.configuration
                     historyGraph: root.miniature.trafficGraph

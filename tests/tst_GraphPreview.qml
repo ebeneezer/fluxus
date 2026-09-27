@@ -34,6 +34,8 @@ TestCase {
     function init() {
         preview.hovered = false;
         preview.dismiss();
+        miniature.width = 100;
+        miniature.height = 80;
         config.previewScalePercent = 300;
         preview.location = PlasmaCore.Types.Floating;
     }
@@ -68,6 +70,18 @@ TestCase {
         mouseClick(close);
         tryCompare(preview, "opened", false);
         verify(preview.keepPanelOpen, "Close must not release the panel during the click");
+    }
+
+    function test_unavailableGeometryKeepsPreviewSized() {
+        compare(preview.calculatePreviewScale(undefined, NaN), 3);
+        compare(preview.calculatePreviewScale(0, 0), 3);
+        miniature.width = 0;
+        miniature.height = 0;
+        preview.pin();
+        const dialog = findChild(preview, "graphPreviewDialog");
+        const enlarged = findChild(dialog.contentItem, "previewView");
+        verify(dialog.width > 0 && dialog.height > 0);
+        verify(enlarged.width > 0 && enlarged.height > 0);
     }
 
     function test_closeKeepsPanelAvailable() {

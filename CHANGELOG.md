@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.1 — 2026-09-27
+
+- Keep hover and pinned preview windows at their requested size on current Plasma/Wayland, preventing them from shrinking to 0 × 0.
+- Use valid fallback dimensions while the panel item or screen geometry is initializing.
+
 ## 0.3.0 — 2026-09-22
 
 - Add a live hover preview and a pinned enlarged view with a Close button.

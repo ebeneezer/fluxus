@@ -47,8 +47,8 @@ saved ID is reported as unavailable, without selecting another drive.
 
 ## Binary Release
 
-Download [Fluxus 0.3.0 for Plasma 6 / Linux x86_64](dist/fluxus-0.3.0-plasma6-linux-x86_64.tar.bz2)
-and its [SHA-256 checksum](dist/fluxus-0.3.0-plasma6-linux-x86_64.tar.bz2.sha256).
+Download [Fluxus 0.3.1 for Plasma 6 / Linux x86_64](dist/fluxus-0.3.1-plasma6-linux-x86_64.tar.bz2)
+and its [SHA-256 checksum](dist/fluxus-0.3.1-plasma6-linux-x86_64.tar.bz2.sha256).
 
 The store archive is built for:
 

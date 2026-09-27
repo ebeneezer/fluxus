@@ -51,10 +51,7 @@ https://github.com/ebeneezer/fluxus
 
 https://github.com/ebeneezer/fluxus/issues
 
-## Version 0.3.0
+## Version 0.3.1
 
-- Live hover preview and pinned enlarged view with a Close button
-- Full shared history and native-resolution rendering with smooth curves
-- Shared preview size (150–600%) set in preferences or by dragging a corner
-- Screen-aware positioning and a subtle Fluxus watermark
-- Brief panel auto-hide delay after closing the preview
+- Fix hover and pinned preview windows shrinking to 0 × 0 after a Plasma/Wayland update
+- Keep previews usable during panel and screen geometry initialization
