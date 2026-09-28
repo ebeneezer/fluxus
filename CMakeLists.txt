@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 
-project(fluxus VERSION 0.3.1 LANGUAGES CXX)
+project(fluxus VERSION 0.3.2 LANGUAGES CXX)
 
 include(CTest)
 
@@ -30,4 +30,10 @@ if(BUILD_TESTING)
     target_link_libraries(test_graphpreview PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Quick)
     add_test(NAME graphpreview COMMAND test_graphpreview)
     set_tests_properties(graphpreview PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+    add_executable(test_numericrates tests/test_numericrates.cpp
+        native/backend/src/networksource.cpp native/backend/src/networksource.h)
+    set_target_properties(test_numericrates PROPERTIES AUTOMOC ON)
+    target_compile_features(test_numericrates PRIVATE cxx_std_20)
+    target_link_libraries(test_numericrates PRIVATE Qt6::Core)
+    add_test(NAME numericrates COMMAND test_numericrates)
 endif()

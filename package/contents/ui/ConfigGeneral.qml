@@ -26,6 +26,7 @@ KCM.SimpleKCM {
     property string cfg_sourceLabel: ""
     property string cfg_networkInterface: "all"
     property real cfg_framesPerSecond: 1
+    property real cfg_numericUpdatesPerSecond: 1
     property int cfg_historySeconds: 60
     property int cfg_panelLengthPercent: 100
     property int cfg_panelLengthPixels: 0
@@ -50,6 +51,7 @@ KCM.SimpleKCM {
     property string cfg_sourceLabelDefault: ""
     property string cfg_networkInterfaceDefault: "all"
     property real cfg_framesPerSecondDefault: 1
+    property real cfg_numericUpdatesPerSecondDefault: 1
     property int cfg_historySecondsDefault: 60
     property int cfg_panelLengthPercentDefault: 100
     property int cfg_panelLengthPixelsDefault: 0
@@ -106,6 +108,7 @@ KCM.SimpleKCM {
         { rate: 25, text: i18n("25 fps") },
         { rate: 30, text: i18n("30 fps") }
     ]
+    readonly property var numericRateChoices: rateChoices.filter(choice => choice.rate <= 10)
     readonly property var fontFamilies: Qt.fontFamilies().slice().sort((left, right) => left.localeCompare(right))
     readonly property var fontWeightChoices: [
         { text: i18n("Light"), value: Font.Light },
@@ -123,11 +126,11 @@ KCM.SimpleKCM {
         return 0;
     }
 
-    function closestRateIndex(rate) {
+    function closestRateIndex(rate, choices = rateChoices) {
         let result = 0;
         let distance = Number.POSITIVE_INFINITY;
-        for (let index = 0; index < rateChoices.length; ++index) {
-            const candidateDistance = Math.abs(rateChoices[index].rate - Number(rate));
+        for (let index = 0; index < choices.length; ++index) {
+            const candidateDistance = Math.abs(choices[index].rate - Number(rate));
             if (candidateDistance < distance) {
                 result = index;
                 distance = candidateDistance;
@@ -215,7 +218,7 @@ KCM.SimpleKCM {
         }
 
         RowLayout {
-            Kirigami.FormData.label: i18n("Update rate:")
+            Kirigami.FormData.label: i18n("Graph update rate:")
             QQC2.Slider {
                 id: frameSlider
                 Layout.fillWidth: true
@@ -230,6 +233,29 @@ KCM.SimpleKCM {
             }
             QQC2.Label {
                 text: root.rateChoices[Math.round(frameSlider.value)].text
+                horizontalAlignment: Text.AlignRight
+                Layout.minimumWidth: 112
+            }
+        }
+
+        RowLayout {
+            Kirigami.FormData.label: i18n("Numeric update rate:")
+
+            QQC2.Slider {
+                id: numericRateSlider
+                Layout.fillWidth: true
+                enabled: root.cfg_showNumeric
+                from: 0
+                to: root.numericRateChoices.length - 1
+                stepSize: 1
+                value: root.closestRateIndex(root.cfg_numericUpdatesPerSecond, root.numericRateChoices)
+                onMoved: {
+                    root.cfg_numericUpdatesPerSecond = root.numericRateChoices[Math.round(value)].rate;
+                    root.configurationChanged();
+                }
+            }
+            QQC2.Label {
+                text: root.numericRateChoices[Math.round(numericRateSlider.value)].text
                 horizontalAlignment: Text.AlignRight
                 Layout.minimumWidth: 112
             }

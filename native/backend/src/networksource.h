@@ -20,6 +20,7 @@ class NetworkSource : public QObject
 
     Q_PROPERTY(QString interfaceName READ interfaceName WRITE setInterfaceName NOTIFY interfaceNameChanged)
     Q_PROPERTY(double framesPerSecond READ framesPerSecond WRITE setFramesPerSecond NOTIFY framesPerSecondChanged)
+    Q_PROPERTY(double numericUpdatesPerSecond READ numericUpdatesPerSecond WRITE setNumericUpdatesPerSecond NOTIFY numericUpdatesPerSecondChanged)
     Q_PROPERTY(bool active READ active WRITE setActive NOTIFY activeChanged)
     // Keep the original QML API and saved interface IDs compatible. Drive
     // sources use a disk: prefix and map reads/writes to the same two channels.
@@ -30,6 +31,8 @@ class NetworkSource : public QObject
     Q_PROPERTY(QStringList interfaces READ interfaces NOTIFY interfacesChanged)
     Q_PROPERTY(double downloadBytesPerSecond READ downloadBytesPerSecond NOTIFY ratesChanged)
     Q_PROPERTY(double uploadBytesPerSecond READ uploadBytesPerSecond NOTIFY ratesChanged)
+    Q_PROPERTY(double numericDownloadBytesPerSecond READ numericDownloadBytesPerSecond NOTIFY numericRatesChanged)
+    Q_PROPERTY(double numericUploadBytesPerSecond READ numericUploadBytesPerSecond NOTIFY numericRatesChanged)
     Q_PROPERTY(bool valid READ valid NOTIFY validChanged)
     Q_PROPERTY(QString errorString READ errorString NOTIFY errorStringChanged)
 
@@ -42,6 +45,8 @@ public:
 
     double framesPerSecond() const;
     void setFramesPerSecond(double framesPerSecond);
+    double numericUpdatesPerSecond() const;
+    void setNumericUpdatesPerSecond(double updatesPerSecond);
 
     bool active() const;
     void setActive(bool active);
@@ -53,6 +58,8 @@ public:
     QVariantList sourceChoices() const;
     double downloadBytesPerSecond() const;
     double uploadBytesPerSecond() const;
+    double numericDownloadBytesPerSecond() const;
+    double numericUploadBytesPerSecond() const;
     bool valid() const;
     QString errorString() const;
 
@@ -63,16 +70,19 @@ Q_SIGNALS:
     void deviceNameChanged();
     void persistentInterfaceNameChanged();
     void framesPerSecondChanged();
+    void numericUpdatesPerSecondChanged();
     void activeChanged();
     void interfacesChanged();
     void sourceChoicesChanged();
     void ratesChanged();
+    void numericRatesChanged();
     void validChanged();
     void errorStringChanged();
     void sampled(double downloadBytesPerSecond, double uploadBytesPerSecond);
 
 private Q_SLOTS:
     void sample();
+    void publishNumericRates();
 
 private:
     struct Counters {
@@ -87,6 +97,7 @@ private:
     Counters readDiskCounters();
     void resetBaseline();
     void setRates(double downloadBytesPerSecond, double uploadBytesPerSecond);
+    void setNumericRates(double downloadBytesPerSecond, double uploadBytesPerSecond);
     void setValid(bool valid);
     void setErrorString(const QString &errorString);
     void applyTimerInterval();
@@ -96,14 +107,21 @@ private:
     QString m_diskDeviceName;
     QByteArray m_interfaceUtf8 = QByteArrayLiteral("all");
     double m_framesPerSecond = 1.0;
+    double m_numericUpdatesPerSecond = 1.0;
     bool m_active = false;
     QVariantList m_sourceChoices;
     QStringList m_interfaces = { QStringLiteral("all") };
     double m_downloadBytesPerSecond = 0.0;
     double m_uploadBytesPerSecond = 0.0;
+    double m_numericDownloadBytesPerSecond = 0.0;
+    double m_numericUploadBytesPerSecond = 0.0;
+    double m_numericDownloadBytes = 0.0;
+    double m_numericUploadBytes = 0.0;
+    double m_numericSeconds = 0.0;
     bool m_valid = false;
     QString m_errorString;
     QTimer m_timer;
+    QTimer m_numericTimer;
     QElapsedTimer m_sampleClock;
     QElapsedTimer m_interfaceClock;
     std::uint64_t m_previousReceived = 0;

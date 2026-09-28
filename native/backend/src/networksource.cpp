@@ -55,6 +55,8 @@ NetworkSource::NetworkSource(QObject *parent)
     // tolerance is immaterial for a bandwidth graph and saves needless wakes.
     m_timer.setTimerType(Qt::CoarseTimer);
     connect(&m_timer, &QTimer::timeout, this, &NetworkSource::sample);
+    m_numericTimer.setTimerType(Qt::CoarseTimer);
+    connect(&m_numericTimer, &QTimer::timeout, this, &NetworkSource::publishNumericRates);
     applyTimerInterval();
 }
 
@@ -112,6 +114,25 @@ void NetworkSource::setFramesPerSecond(double framesPerSecond)
     Q_EMIT framesPerSecondChanged();
 }
 
+double NetworkSource::numericUpdatesPerSecond() const
+{
+    return m_numericUpdatesPerSecond;
+}
+
+void NetworkSource::setNumericUpdatesPerSecond(double updatesPerSecond)
+{
+    const double bounded = std::clamp(updatesPerSecond, 0.2, 10.0);
+    if (qFuzzyCompare(m_numericUpdatesPerSecond + 1.0, bounded + 1.0)) {
+        return;
+    }
+    m_numericUpdatesPerSecond = bounded;
+    m_numericDownloadBytes = 0.0;
+    m_numericUploadBytes = 0.0;
+    m_numericSeconds = 0.0;
+    applyTimerInterval();
+    Q_EMIT numericUpdatesPerSecondChanged();
+}
+
 bool NetworkSource::active() const
 {
     return m_active;
@@ -129,8 +150,10 @@ void NetworkSource::setActive(bool active)
         resetBaseline();
         sample();
         m_timer.start();
+        m_numericTimer.start();
     } else {
         m_timer.stop();
+        m_numericTimer.stop();
         resetBaseline();
         setRates(0.0, 0.0);
     }
@@ -170,6 +193,16 @@ double NetworkSource::downloadBytesPerSecond() const
 double NetworkSource::uploadBytesPerSecond() const
 {
     return m_uploadBytesPerSecond;
+}
+
+double NetworkSource::numericDownloadBytesPerSecond() const
+{
+    return m_numericDownloadBytesPerSecond;
+}
+
+double NetworkSource::numericUploadBytesPerSecond() const
+{
+    return m_numericUploadBytesPerSecond;
 }
 
 bool NetworkSource::valid() const
@@ -283,8 +316,23 @@ void NetworkSource::sample()
 
     const double download = static_cast<double>(receivedDelta) / seconds;
     const double upload = static_cast<double>(transmittedDelta) / seconds;
+    m_numericDownloadBytes += static_cast<double>(receivedDelta);
+    m_numericUploadBytes += static_cast<double>(transmittedDelta);
+    m_numericSeconds += seconds;
     setRates(download, upload);
     Q_EMIT sampled(download, upload);
+}
+
+void NetworkSource::publishNumericRates()
+{
+    if (m_numericSeconds <= 0.0) {
+        return;
+    }
+    setNumericRates(m_numericDownloadBytes / m_numericSeconds,
+                    m_numericUploadBytes / m_numericSeconds);
+    m_numericDownloadBytes = 0.0;
+    m_numericUploadBytes = 0.0;
+    m_numericSeconds = 0.0;
 }
 
 bool NetworkSource::ensureOpen(int &fd, const char *path)
@@ -409,6 +457,10 @@ void NetworkSource::resetBaseline()
     m_previousReceived = 0;
     m_previousTransmitted = 0;
     m_sampleClock.invalidate();
+    m_numericDownloadBytes = 0.0;
+    m_numericUploadBytes = 0.0;
+    m_numericSeconds = 0.0;
+    setNumericRates(0.0, 0.0);
 }
 
 void NetworkSource::setRates(double downloadBytesPerSecond, double uploadBytesPerSecond)
@@ -420,6 +472,17 @@ void NetworkSource::setRates(double downloadBytesPerSecond, double uploadBytesPe
     m_downloadBytesPerSecond = downloadBytesPerSecond;
     m_uploadBytesPerSecond = uploadBytesPerSecond;
     Q_EMIT ratesChanged();
+}
+
+void NetworkSource::setNumericRates(double downloadBytesPerSecond, double uploadBytesPerSecond)
+{
+    if (qFuzzyCompare(m_numericDownloadBytesPerSecond + 1.0, downloadBytesPerSecond + 1.0)
+            && qFuzzyCompare(m_numericUploadBytesPerSecond + 1.0, uploadBytesPerSecond + 1.0)) {
+        return;
+    }
+    m_numericDownloadBytesPerSecond = downloadBytesPerSecond;
+    m_numericUploadBytesPerSecond = uploadBytesPerSecond;
+    Q_EMIT numericRatesChanged();
 }
 
 void NetworkSource::setValid(bool valid)
@@ -443,4 +506,5 @@ void NetworkSource::setErrorString(const QString &errorString)
 void NetworkSource::applyTimerInterval()
 {
     m_timer.setInterval(qRound(1000.0 / m_framesPerSecond));
+    m_numericTimer.setInterval(qRound(1000.0 / m_numericUpdatesPerSecond));
 }

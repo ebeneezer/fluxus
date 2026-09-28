@@ -14,6 +14,7 @@ Item {
 
     required property FluxusBackend.NetworkSource source
     required property var configuration
+    property real viewScale: 1
 
     // Share samples, but lay out and paint each view at its actual size.
     property FluxusBackend.TrafficGraph historyGraph: null
@@ -27,6 +28,9 @@ Item {
     readonly property color downloadColor: configuration.downloadColor || "#00E6E6"
     readonly property color labelColor: configuration.labelColor || "#FFFFFF"
     readonly property int fontWeight: configuration.fontWeight || Font.Normal
+    readonly property real numericScale: Math.pow(Math.max(1, viewScale), 0.6)
+    readonly property int numericPixelSize: Math.max(6, Math.min(72,
+        Math.round((configuration.numericFontSize || 15) * numericScale)))
     readonly property bool topReadout: (configuration.numericPosition || "topLeft").startsWith("top")
     readonly property bool leftReadout: (configuration.numericPosition || "topLeft").endsWith("Left")
     readonly property bool statisticsBelowLeds: configuration.showNumeric !== false
@@ -123,17 +127,18 @@ Item {
 
                     Text {
                         id: rateLabel
+                        objectName: "graphRateLabel"
                         anchors.fill: parent
                         anchors.leftMargin: 2
                         anchors.rightMargin: 2
                         text: root.formatRate(parent.uploadDirection
-                            ? root.source.uploadBytesPerSecond
-                            : root.source.downloadBytesPerSecond)
+                            ? root.source.numericUploadBytesPerSecond
+                            : root.source.numericDownloadBytesPerSecond)
                         color: parent.uploadDirection ? root.uploadColor : root.downloadColor
                         font.family: root.configuration.numericFontFamily || "Monospace"
                         font.pixelSize: root.configuration.autoNumericFontSize === true
                             ? Math.max(6, Math.floor(graph.height * 0.24))
-                            : Math.max(6, Math.min(72, root.configuration.numericFontSize || 15))
+                            : root.numericPixelSize
                         font.weight: root.fontWeight
                         fontSizeMode: root.configuration.autoNumericFontSize === true
                             ? Text.HorizontalFit : Text.FixedSize
@@ -154,8 +159,8 @@ Item {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         height: root.statisticsBelowLeds
-            ? Math.max(30, Math.min(42, root.height * 0.40))
-            : Math.max(14, Math.min(32, root.height * 0.19))
+            ? Math.max(30, Math.min(42 * root.numericScale, root.height * 0.40))
+            : Math.max(14, Math.min(32 * root.numericScale, root.height * 0.19))
 
         Text {
             id: interfaceLabel
@@ -214,12 +219,13 @@ Item {
                 height: statusStatistics.height
                 directionName: root.diskSource ? "write" : "up"
                 directionColor: root.uploadColor
-                rateText: root.formatRate(root.source.uploadBytesPerSecond).replace(" ", "")
+                rateText: root.formatRate(root.source.numericUploadBytesPerSecond).replace(" ", "")
                 ledIntensity: root.ledIntensity(root.source.uploadBytesPerSecond)
                 labelColor: root.labelColor
                 showLed: root.configuration.showLeds !== false
                 numericFontFamily: root.configuration.numericFontFamily || "Monospace"
-                numericFontSize: root.configuration.numericFontSize || 15
+                numericFontSize: root.numericPixelSize
+                numericScale: root.numericScale
                 fontWeight: root.fontWeight
                 autoNumericFontSize: root.configuration.autoNumericFontSize === true
             }
@@ -229,12 +235,13 @@ Item {
                 height: statusStatistics.height
                 directionName: root.diskSource ? "read" : "down"
                 directionColor: root.downloadColor
-                rateText: root.formatRate(root.source.downloadBytesPerSecond).replace(" ", "")
+                rateText: root.formatRate(root.source.numericDownloadBytesPerSecond).replace(" ", "")
                 ledIntensity: root.ledIntensity(root.source.downloadBytesPerSecond)
                 labelColor: root.labelColor
                 showLed: root.configuration.showLeds !== false
                 numericFontFamily: root.configuration.numericFontFamily || "Monospace"
-                numericFontSize: root.configuration.numericFontSize || 15
+                numericFontSize: root.numericPixelSize
+                numericScale: root.numericScale
                 fontWeight: root.fontWeight
                 autoNumericFontSize: root.configuration.autoNumericFontSize === true
             }

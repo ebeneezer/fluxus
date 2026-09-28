@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.2 — 2026-09-28
+
+- Set graph and numeric readout update rates independently; numeric values show averages over their selected interval.
+- Place both update-rate controls together and scale numeric readouts with the enlarged preview.
+- Keep the Plasma context menu accessible while the hover preview overlaps the widget.
+
 ## 0.3.1 — 2026-09-27
 
 - Keep hover and pinned preview windows at their requested size on current Plasma/Wayland, preventing them from shrinking to 0 × 0.

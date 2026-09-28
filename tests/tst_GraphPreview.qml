@@ -15,6 +15,7 @@ TestCase {
     QtObject {
         id: config
         property int previewScalePercent: 300
+        property int numericFontSize: 15
         property string sourceLabel: "Preview test"
     }
     NetworkSource { id: source; active: false }
@@ -50,6 +51,7 @@ TestCase {
         verify(!preview.opened);
         tryCompare(preview, "opened", true);
         const dialog = findChild(preview, "graphPreviewDialog");
+        verify((dialog.flags & Qt.WindowTransparentForInput) !== 0);
         const hoverSize = Qt.size(dialog.width, dialog.height);
         const enlarged = findChild(dialog.contentItem, "previewView");
         verify(enlarged !== null);
@@ -59,7 +61,13 @@ TestCase {
         compare(enlarged.historyGraph, miniature.trafficGraph);
         compare(enlarged.trafficGraph.width, enlarged.width);
         verify(enlarged.trafficGraph.width > miniature.trafficGraph.width);
+        const miniatureRate = findChild(miniature, "graphRateLabel");
+        const previewRate = findChild(enlarged, "graphRateLabel");
+        verify(miniatureRate !== null && previewRate !== null);
+        verify(previewRate.font.pixelSize > miniatureRate.font.pixelSize);
+        verify(previewRate.font.pixelSize < miniatureRate.font.pixelSize * preview.previewScale);
         preview.pin();
+        verify((dialog.flags & Qt.WindowTransparentForInput) === 0);
         compare(Qt.size(dialog.width, dialog.height), hoverSize);
         preview.hovered = false;
         wait(250);
@@ -124,6 +132,27 @@ TestCase {
         preview.hovered = false;
         preview.hovered = true;
         tryCompare(preview, "opened", true);
+    }
+
+    function test_contextMenuDismissKeepsPanelAvailable() {
+        preview.hovered = true;
+        tryCompare(preview, "opened", true);
+        preview.dismissForContextMenu();
+        verify(preview.keepPanelOpen);
+        tryCompare(preview, "opened", false);
+        verify(preview.keepPanelOpen);
+        wait(250);
+        verify(!preview.opened);
+        verify(preview.keepPanelOpen);
+    }
+
+    function test_hoverInputPassesThroughOverlappingPreview() {
+        preview.hovered = true;
+        tryCompare(preview, "opened", true);
+        const dialog = findChild(preview, "graphPreviewDialog");
+        verify((dialog.flags & Qt.WindowTransparentForInput) !== 0);
+        preview.hovered = false;
+        verify((dialog.flags & Qt.WindowTransparentForInput) === 0);
     }
 
     function test_sharedSizeAndDrag_data() {

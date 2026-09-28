@@ -39,6 +39,8 @@ PlasmoidItem {
         id: networkSource
         interfaceName: root.configuredNetworkInterface
         framesPerSecond: Math.max(0.2, Math.min(30, Plasmoid.configuration.framesPerSecond || 1))
+        numericUpdatesPerSecond: Math.max(0.2, Math.min(10,
+            Plasmoid.configuration.numericUpdatesPerSecond || 1))
         active: root.visible || (root.activePreview !== null && root.activePreview.opened)
         // Upgrade legacy kernel names while their current drive is available.
         // Persist the identity so subsequent boots cannot select another SSD.
@@ -117,6 +119,14 @@ PlasmoidItem {
                 }
                 Component.onDestruction: {
                     if (root.activePreview === preview) root.activePreview = null;
+                }
+            }
+
+            Connections {
+                target: Plasmoid
+                function onContextualActionsAboutToShow() {
+                    // Hold auto-hide while Plasma opens its context menu.
+                    if (preview.opened && !preview.pinned) preview.dismissForContextMenu();
                 }
             }
         }

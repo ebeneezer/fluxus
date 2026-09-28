@@ -48,17 +48,27 @@ Item {
         closeGrace.stop();
     }
 
-    function dismiss(fromCloseButton = false) {
+    function dismiss(keepPanelOpen = false) {
         showTimer.stop();
         hideTimer.stop();
-        // Plasma immediately restores auto-hide when a transient window closes.
-        // Keep the panel available briefly while the pointer returns from Close.
-        // Start the hold BEFORE hiding the window to avoid an auto-hide pulse.
-        if (fromCloseButton) closeGrace.restart();
+        // Closing a transient window can restore panel auto-hide before a click
+        // finishes or before Plasma's context menu is fully shown.
+        if (keepPanelOpen) closeGrace.restart();
         else closeGrace.stop();
         requested = false;
         pinned = false;
         suppressed = hovered;
+    }
+
+    function dismissForContextMenu() {
+        // Let Plasma finish dispatching the right click and create its menu
+        // before changing the popup's window visibility.
+        closeGrace.restart();
+        showTimer.stop();
+        suppressed = true;
+        Qt.callLater(function() {
+            if (root.opened && !root.pinned) root.dismiss(true);
+        });
     }
 
     function resizeToPercent(percent) {
@@ -100,7 +110,10 @@ Item {
         visualParent: root.miniature
         location: root.location
         type: PlasmaCore.Dialog.AppletPopup
-        flags: Qt.Tool | Qt.WindowStaysOnTopHint | Qt.WindowDoesNotAcceptFocus
+        // While the pointer is on the applet, let clicks pass through any
+        // overlap. Once it leaves, the preview can receive hover again.
+        flags: Qt.Tool | Qt.WindowDoesNotAcceptFocus
+            | (!root.pinned && root.hovered ? Qt.WindowTransparentForInput : 0)
         hideOnWindowDeactivate: false
         visible: root.requested
         title: root.miniature.source.deviceName
@@ -170,6 +183,7 @@ Item {
                     source: root.miniature.source
                     configuration: root.configuration
                     historyGraph: root.miniature.trafficGraph
+                    viewScale: root.previewScale
                     clip: true
                 }
             }

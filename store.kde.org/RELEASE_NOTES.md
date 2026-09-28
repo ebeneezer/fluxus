@@ -1,4 +1,5 @@
-# Fluxus 0.3.1
+# Fluxus 0.3.2
 
-- Fix hover and pinned preview windows shrinking to 0 × 0 after a Plasma/Wayland update.
-- Keep previews usable while the panel item or screen geometry is initializing.
+- Configure graph sampling and numeric readout updates independently. Numeric values average the measurements in each display interval.
+- Find both update-rate controls together. Enlarged previews scale numeric readouts to a legible size.
+- Open the Plasma context menu directly while the hover preview is visible.

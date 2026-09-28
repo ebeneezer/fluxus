@@ -12,7 +12,8 @@ are drawn in cyan and amber on a dark, bevelled graph.
 - Decimal disk throughput in B/s, kB/s, MB/s, GB/s or TB/s; custom source labels
 - Overlay or split upload/download graphs
 - Independent line, filled-area, or bar rendering
-- Configurable sampling rate from one frame every 5 seconds to 30 frames per second
+- Configurable graph sampling from one frame every 5 seconds to 30 frames per second
+- Independent numeric update rate with interval averages for readable values
 - Configurable history window from 10 seconds to 15 minutes
 - Automatically scaled decimal `b`, `k`, `M`, and `G` bit-rate readouts
 - Full-width numeric readouts with text-sized translucent backgrounds
@@ -47,8 +48,8 @@ saved ID is reported as unavailable, without selecting another drive.
 
 ## Binary Release
 
-Download [Fluxus 0.3.1 for Plasma 6 / Linux x86_64](dist/fluxus-0.3.1-plasma6-linux-x86_64.tar.bz2)
-and its [SHA-256 checksum](dist/fluxus-0.3.1-plasma6-linux-x86_64.tar.bz2.sha256).
+Download [Fluxus 0.3.2 for Plasma 6 / Linux x86_64](dist/fluxus-0.3.2-plasma6-linux-x86_64.tar.bz2)
+and its [SHA-256 checksum](dist/fluxus-0.3.2-plasma6-linux-x86_64.tar.bz2.sha256).
 
 The store archive is built for:
 
@@ -134,6 +135,9 @@ thickness (50–1000%). These settings do not affect desktop sizing.
 **Font weight** applies to numeric rates and status labels and defaults to Normal.
 Choose Light for thinner text; the available appearance depends on the selected
 font family. Numeric readouts use a translucent background without a text outline.
+**Graph update rate** controls sampling and graph motion; **Numeric update rate**
+controls how often interval averages appear in the readouts. Both default to 1 fps
+and can be adjusted independently.
 
 Hover over Fluxus to open a live enlarged preview. Click the widget to keep that
 same window open until its Close button is pressed. **Preview size** sets the
@@ -142,7 +146,8 @@ corner of the pinned window to change and save the same setting. Both modes use
 identical dimensions, bounded by the available screen area. The preview shares
 the miniature's complete history, colors, directions and display settings, and
 draws the samples afresh at its actual size. Curves use the larger pixel grid;
-strokes, text and LEDs are rendered without a magnifying transform. A subtle
+strokes, text and LEDs are rendered without a magnifying transform. Numeric
+readouts grow moderately with the preview size. A subtle
 Fluxus watermark sits behind the enlarged graph. After pressing Close, the panel
 stays available for up to 1.5 seconds while the pointer returns, then resumes its
 configured auto-hide behavior.

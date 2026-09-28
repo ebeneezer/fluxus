@@ -12,7 +12,7 @@ horizontal panels, vertical panels, and on the desktop.
 - Selectable Linux network interface or aggregate mode
 - Overlay or split-direction traffic graphs
 - Line, filled-area, and bar graph styles
-- Configurable sampling rate and history window
+- Independent graph and numeric readout update rates, and a configurable history window
 - Automatic or fixed graph grid
 - Readable numeric rates with configurable font and placement
 - Optional upload/download activity LEDs

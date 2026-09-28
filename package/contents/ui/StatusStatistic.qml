@@ -17,6 +17,7 @@ Item {
     required property string numericFontFamily
     required property int numericFontSize
     required property bool autoNumericFontSize
+    property real numericScale: 1
     property int fontWeight: Font.Normal
 
     Row {
@@ -40,7 +41,8 @@ Item {
             text: root.directionName
             color: root.labelColor
             font.family: "sans-serif"
-            font.pixelSize: Math.max(7, Math.min(9, Math.floor(root.height * 0.34)))
+            font.pixelSize: Math.max(7, Math.min(9 * root.numericScale,
+                Math.floor(root.height * 0.34)))
             font.weight: root.fontWeight
         }
     }

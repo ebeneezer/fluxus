@@ -36,6 +36,7 @@ Window {
     FluxusUi.FluxusView {
         x: 20; y: 140
         width: 300; height: 210
+        viewScale: 3
         source: source
         configuration: config
         historyGraph: miniature.trafficGraph
@@ -44,6 +45,7 @@ Window {
     FluxusUi.FluxusView {
         x: 350; y: 140
         width: 600; height: 420
+        viewScale: 6
         source: source
         configuration: config
         historyGraph: miniature.trafficGraph

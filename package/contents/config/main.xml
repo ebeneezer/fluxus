@@ -18,6 +18,12 @@
       <min>0.2</min>
       <max>30</max>
     </entry>
+    <entry name="numericUpdatesPerSecond" type="Double">
+      <label>Numeric readout update rate.</label>
+      <default>1</default>
+      <min>0.2</min>
+      <max>10</max>
+    </entry>
     <entry name="historySeconds" type="Int">
       <label>Visible traffic history in seconds.</label>
       <default>60</default>
