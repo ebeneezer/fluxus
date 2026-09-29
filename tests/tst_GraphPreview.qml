@@ -59,6 +59,8 @@ TestCase {
         compare(enlarged.height, Math.ceil(miniature.height * preview.previewScale));
         compare(enlarged.scale, 1);
         compare(enlarged.historyGraph, miniature.trafficGraph);
+        compare(miniature.trafficGraph.showGridLabels, false);
+        compare(enlarged.trafficGraph.showGridLabels, true);
         compare(enlarged.trafficGraph.width, enlarged.width);
         verify(enlarged.trafficGraph.width > miniature.trafficGraph.width);
         const miniatureRate = findChild(miniature, "graphRateLabel");

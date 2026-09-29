@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.3 — 2026-09-29
+
+- Label grid lines in enlarged previews only: percentages for fixed spacing and throughput values for automatic spacing.
+- End each labeled grid line shortly before its label, leaving a small gap.
+
 ## 0.3.2 — 2026-09-28
 
 - Set graph and numeric readout update rates independently; numeric values show averages over their selected interval.

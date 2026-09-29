@@ -51,8 +51,8 @@ https://github.com/ebeneezer/fluxus
 
 https://github.com/ebeneezer/fluxus/issues
 
-## Version 0.3.2
+## Version 0.3.3
 
-- Set graph and numeric readout update rates independently, with interval averages for numeric values
-- Scale numeric readouts in the enlarged preview
-- Keep the Plasma context menu accessible while the hover preview is shown
+- Label grid lines only in enlarged previews
+- Show percentages for fixed grids and throughput values for automatic grids
+- Leave a small gap between each grid stroke and its label

@@ -20,6 +20,7 @@ are drawn in cyan and amber on a dark, bevelled graph.
 - Searchable font selector, selectable weight (Light through Bold), fixed font size, and automatic fit mode
 - Fixed panel width/height in logical pixels or proportional panel sizing
 - Optional fixed-count or automatically derived horizontal grid lines
+- Small grid labels in enlarged previews, using percentages for fixed spacing and rates for automatic spacing
 - Optional activity LEDs and interface label
 - Configurable colors, graph direction, and numeric placement
 - Live hover preview and pinned enlarged view, with shared size and full history
@@ -48,8 +49,8 @@ saved ID is reported as unavailable, without selecting another drive.
 
 ## Binary Release
 
-Download [Fluxus 0.3.2 for Plasma 6 / Linux x86_64](dist/fluxus-0.3.2-plasma6-linux-x86_64.tar.bz2)
-and its [SHA-256 checksum](dist/fluxus-0.3.2-plasma6-linux-x86_64.tar.bz2.sha256).
+Download [Fluxus 0.3.3 for Plasma 6 / Linux x86_64](dist/fluxus-0.3.3-plasma6-linux-x86_64.tar.bz2)
+and its [SHA-256 checksum](dist/fluxus-0.3.3-plasma6-linux-x86_64.tar.bz2.sha256).
 
 The store archive is built for:
 

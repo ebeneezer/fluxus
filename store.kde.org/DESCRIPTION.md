@@ -13,7 +13,7 @@ horizontal panels, vertical panels, and on the desktop.
 - Overlay or split-direction traffic graphs
 - Line, filled-area, and bar graph styles
 - Independent graph and numeric readout update rates, and a configurable history window
-- Automatic or fixed graph grid
+- Automatic or fixed graph grid, with labels in enlarged previews
 - Readable numeric rates with configurable font and placement
 - Optional upload/download activity LEDs
 - Configurable colors and panel length

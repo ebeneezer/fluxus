@@ -2,8 +2,10 @@
 #include "../native/backend/src/trafficgraph.h"
 
 #include <QGuiApplication>
+#include <QFontMetricsF>
 #include <QImage>
 #include <QPainter>
+#include <cmath>
 #include <cstdlib>
 #include <iostream>
 
@@ -73,6 +75,39 @@ int main(int argc, char **argv)
         }
         check(gridPixels == 3, "grid strokes must remain one pixel at every preview size");
     }
+    grid.setSize(QSizeF(288, 216));
+    const QImage unlabeledGrid = render(grid);
+    grid.setShowGridLabels(true);
+    const QImage labeledGrid = render(grid);
+    check(labeledGrid != unlabeledGrid, "fixed grid labels must appear when enabled");
+    QImage fontProbe(1, 1, QImage::Format_ARGB32_Premultiplied);
+    QPainter fontPainter(&fontProbe);
+    QFont labelFont = fontPainter.font();
+    labelFont.setPixelSize(10);
+    const QFontMetricsF labelMetrics(labelFont);
+    const int gapX = static_cast<int>(std::floor(288 - 4 - labelMetrics.horizontalAdvance(QStringLiteral("75%")) - 2));
+    int firstLineY = -1;
+    for (int y = 50; y < 60; ++y) {
+        if (labeledGrid.pixelColor(20, y) == grid.gridColor()) {
+            firstLineY = y;
+            break;
+        }
+    }
+    check(firstLineY >= 0, "labeled grid must retain the stroke before its label");
+    check(unlabeledGrid.pixelColor(gapX, firstLineY) == grid.gridColor(),
+          "miniature grid must run through the label area");
+    check(labeledGrid.pixelColor(gapX, firstLineY) == grid.backgroundColor(),
+          "preview grid stroke must leave a gap before its label");
+    grid.setShowGridLabels(false);
+    check(render(grid) == unlabeledGrid, "disabling labels must leave the miniature unchanged");
+
+    preview.setSize(QSizeF(288, 216));
+    preview.setGridMode(QStringLiteral("auto"));
+    const QImage unlabeledAutomaticGrid = render(preview);
+    preview.setShowGridLabels(true);
+    check(render(preview) != unlabeledAutomaticGrid, "automatic grid labels must appear in the preview");
+    preview.setShowGridLabels(false);
+    preview.setSize(miniature.size());
 
     const QImage beforePreviewClear = render(miniature);
     preview.clear();

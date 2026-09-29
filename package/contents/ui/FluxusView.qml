@@ -91,6 +91,7 @@ Item {
         downloadStyle: root.configuration.downloadStyle || "line"
         gridMode: root.configuration.gridMode || "auto"
         gridLineCount: root.configuration.gridLineCount || 6
+        showGridLabels: root.historyGraph !== null
         backgroundColor: root.historyGraph !== null ? "transparent" : root.plotColor
         gridColor: root.gridColor
         uploadColor: root.uploadColor

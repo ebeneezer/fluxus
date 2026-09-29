@@ -1,5 +1,5 @@
-# Fluxus 0.3.2
+# Fluxus 0.3.3
 
-- Configure graph sampling and numeric readout updates independently. Numeric values average the measurements in each display interval.
-- Find both update-rate controls together. Enlarged previews scale numeric readouts to a legible size.
-- Open the Plasma context menu directly while the hover preview is visible.
+- Read small grid labels in enlarged previews without cluttering the panel miniature.
+- Fixed grid lines show percentages; automatic grid lines show throughput values.
+- Grid strokes stop just before their labels, leaving a small gap.

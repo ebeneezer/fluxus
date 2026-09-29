@@ -11,6 +11,8 @@
 #include <QPointer>
 #include <QPolygonF>
 #include <QQuickPaintedItem>
+#include <QRectF>
+#include <QString>
 #include <QVector>
 #include <memory>
 
@@ -28,6 +30,7 @@ class TrafficGraph : public QQuickPaintedItem
     Q_PROPERTY(QString downloadStyle READ downloadStyle WRITE setDownloadStyle NOTIFY appearanceChanged)
     Q_PROPERTY(QString gridMode READ gridMode WRITE setGridMode NOTIFY appearanceChanged)
     Q_PROPERTY(int gridLineCount READ gridLineCount WRITE setGridLineCount NOTIFY appearanceChanged)
+    Q_PROPERTY(bool showGridLabels READ showGridLabels WRITE setShowGridLabels NOTIFY appearanceChanged)
     Q_PROPERTY(QColor backgroundColor READ backgroundColor WRITE setBackgroundColor NOTIFY appearanceChanged)
     Q_PROPERTY(QColor gridColor READ gridColor WRITE setGridColor NOTIFY appearanceChanged)
     Q_PROPERTY(QColor uploadColor READ uploadColor WRITE setUploadColor NOTIFY appearanceChanged)
@@ -57,6 +60,8 @@ public:
     void setGridMode(const QString &gridMode);
     int gridLineCount() const;
     void setGridLineCount(int gridLineCount);
+    bool showGridLabels() const;
+    void setShowGridLabels(bool show);
     QColor backgroundColor() const;
     void setBackgroundColor(const QColor &backgroundColor);
     QColor gridColor() const;
@@ -89,6 +94,12 @@ private:
         int count = 0;
     };
 
+    struct GridLabel {
+        QRectF area;
+        qreal y;
+        QString text;
+    };
+
     static Style parseStyle(const QString &style);
     static QString styleName(Style style);
     double automaticCeiling(double observedMaximum) const;
@@ -98,7 +109,9 @@ private:
     void resizeHistory(int capacity);
     Sample sampleAt(int chronologicalIndex) const;
     double maximum(bool upload) const;
-    void paintGrid(QPainter *painter, const QRectF &area, double observedMaximum, bool inverted);
+    void paintGrid(QPainter *painter, const QRectF &area, double observedMaximum,
+                   bool inverted, QVector<GridLabel> *labels);
+    void paintGridLabels(QPainter *painter, QVector<GridLabel> &labels);
     void paintDirection(QPainter *painter, const QRectF &area, bool upload, bool inverted,
                         Style style, const QColor &color, double ceiling);
 
@@ -123,6 +136,7 @@ private:
     Style m_downloadStyle = Style::Line;
     QString m_gridMode = QStringLiteral("auto");
     int m_gridLineCount = 6;
+    bool m_showGridLabels = false;
     QColor m_backgroundColor = QColor(45, 51, 60);
     QColor m_gridColor = QColor(23, 27, 30);
     QColor m_uploadColor = QColor(188, 136, 68);
