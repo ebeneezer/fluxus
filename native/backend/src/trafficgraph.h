@@ -110,7 +110,7 @@ private:
     Sample sampleAt(int chronologicalIndex) const;
     double maximum(bool upload) const;
     void paintGrid(QPainter *painter, const QRectF &area, double observedMaximum,
-                   bool inverted, QVector<GridLabel> *labels);
+                   QVector<GridLabel> *labels);
     void paintGridLabels(QPainter *painter, QVector<GridLabel> &labels);
     void paintDirection(QPainter *painter, const QRectF &area, bool upload, bool inverted,
                         Style style, const QColor &color, double ceiling);

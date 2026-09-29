@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 
-project(fluxus VERSION 0.3.3 LANGUAGES CXX)
+project(fluxus VERSION 0.3.4 LANGUAGES CXX)
 
 include(CTest)
 

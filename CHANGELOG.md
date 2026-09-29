@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.4 — 2026-09-29
+
+- Order fixed and automatic grid labels from smaller values at the bottom to larger values at the top, regardless of graph direction.
+
 ## 0.3.3 — 2026-09-29
 
 - Label grid lines in enlarged previews only: percentages for fixed spacing and throughput values for automatic spacing.

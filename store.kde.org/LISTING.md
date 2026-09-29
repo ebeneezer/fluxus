@@ -51,8 +51,8 @@ https://github.com/ebeneezer/fluxus
 
 https://github.com/ebeneezer/fluxus/issues
 
-## Version 0.3.3
+## Version 0.3.4
 
-- Label grid lines only in enlarged previews
-- Show percentages for fixed grids and throughput values for automatic grids
+- Order grid labels from smaller values at the bottom to larger values at the top, regardless of graph direction
+- Show percentages for fixed grids and throughput values for automatic grids in enlarged previews
 - Leave a small gap between each grid stroke and its label

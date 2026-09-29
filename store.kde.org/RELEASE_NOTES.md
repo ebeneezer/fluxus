@@ -1,5 +1,4 @@
-# Fluxus 0.3.3
+# Fluxus 0.3.4
 
-- Read small grid labels in enlarged previews without cluttering the panel miniature.
-- Fixed grid lines show percentages; automatic grid lines show throughput values.
-- Grid strokes stop just before their labels, leaving a small gap.
+- Read grid labels from smaller values at the bottom to larger values at the top in enlarged previews, even when a graph direction starts at the top.
+- Fixed grids show percentages; automatic grids show throughput values. Grid strokes stop before each label.

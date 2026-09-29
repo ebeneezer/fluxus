@@ -291,8 +291,8 @@ void TrafficGraph::paint(QPainter *painter)
             ? automaticCeiling(uploadMaximum) : std::max(1.0, uploadMaximum);
         const double downloadCeiling = m_gridMode == QStringLiteral("auto")
             ? automaticCeiling(downloadMaximum) : std::max(1.0, downloadMaximum);
-        paintGrid(painter, uploadArea, uploadMaximum, m_uploadInverted, labels);
-        paintGrid(painter, downloadArea, downloadMaximum, m_downloadInverted, labels);
+        paintGrid(painter, uploadArea, uploadMaximum, labels);
+        paintGrid(painter, downloadArea, downloadMaximum, labels);
         paintDirection(painter, uploadArea, true, m_uploadInverted, m_uploadStyle,
                        m_uploadColor, uploadCeiling);
         paintDirection(painter, downloadArea, false, m_downloadInverted, m_downloadStyle,
@@ -301,12 +301,10 @@ void TrafficGraph::paint(QPainter *painter)
         painter->drawLine(QPointF(area.left(), std::floor(area.center().y()) + 0.5),
                           QPointF(area.right(), std::floor(area.center().y()) + 0.5));
     } else {
-        const bool uploadDefinesScale = uploadMaximum >= downloadMaximum;
         const double observedMaximum = std::max(uploadMaximum, downloadMaximum);
         const double ceiling = m_gridMode == QStringLiteral("auto")
             ? automaticCeiling(observedMaximum) : std::max(1.0, observedMaximum);
-        paintGrid(painter, area, observedMaximum,
-                  uploadDefinesScale ? m_uploadInverted : m_downloadInverted, labels);
+        paintGrid(painter, area, observedMaximum, labels);
         paintDirection(painter, area, true, m_uploadInverted, m_uploadStyle, m_uploadColor, ceiling);
         paintDirection(painter, area, false, m_downloadInverted, m_downloadStyle, m_downloadColor, ceiling);
     }
@@ -445,7 +443,7 @@ double TrafficGraph::maximum(bool upload) const
 }
 
 void TrafficGraph::paintGrid(QPainter *painter, const QRectF &area, double observedMaximum,
-                             bool inverted, QVector<GridLabel> *labels)
+                             QVector<GridLabel> *labels)
 {
     if (m_gridMode == QStringLiteral("off") || area.height() <= 1.0) {
         return;
@@ -478,7 +476,7 @@ void TrafficGraph::paintGrid(QPainter *painter, const QRectF &area, double obser
             const qreal fraction = static_cast<qreal>(line) / (m_gridLineCount + 1);
             const qreal y = std::floor(area.top() + fraction * area.height()) + 0.5;
             if (labels) {
-                const int percent = std::lround((inverted ? fraction : 1.0 - fraction) * 100.0);
+                const int percent = std::lround((1.0 - fraction) * 100.0);
                 drawGridLine(y, QString::number(percent) + QLatin1Char('%'));
             } else {
                 drawGridLine(y, {});
@@ -499,9 +497,7 @@ void TrafficGraph::paintGrid(QPainter *painter, const QRectF &area, double obser
     const double displayCeiling = std::floor(displayMaximum / decade) * decade;
     for (double marker = decade; marker < displayCeiling; marker += decade) {
         const qreal fraction = marker / displayCeiling;
-        const qreal rawY = inverted
-            ? area.top() + fraction * area.height()
-            : area.bottom() - fraction * area.height();
+        const qreal rawY = area.bottom() - fraction * area.height();
         const qreal y = std::floor(rawY) + 0.5;
         if (y > area.top() && y < area.bottom()) {
             if (labels) {

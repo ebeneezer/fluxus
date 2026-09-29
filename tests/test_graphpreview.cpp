@@ -98,8 +98,45 @@ int main(int argc, char **argv)
           "miniature grid must run through the label area");
     check(labeledGrid.pixelColor(gapX, firstLineY) == grid.backgroundColor(),
           "preview grid stroke must leave a gap before its label");
+    grid.setGridLineCount(10);
+    const QImage orderedGrid = render(grid);
+    const auto lineEndNear = [&](int expectedY) {
+        for (int y = expectedY - 1; y <= expectedY + 1; ++y) {
+            if (orderedGrid.pixelColor(20, y) != grid.gridColor()) continue;
+            int x = 20;
+            while (x < orderedGrid.width() && orderedGrid.pixelColor(x, y) == grid.gridColor()) ++x;
+            return x - 1;
+        }
+        return -1;
+    };
+    const int topLineEnd = lineEndNear(19);
+    const int bottomLineEnd = lineEndNear(196);
+    check(topLineEnd > 20 && bottomLineEnd > 20 && topLineEnd < bottomLineEnd,
+          "larger percentage labels must be above smaller labels");
+    grid.setUploadInverted(false);
+    check(render(grid) == orderedGrid, "fixed grid label order must ignore graph direction");
+    grid.setUploadInverted(true);
     grid.setShowGridLabels(false);
+    grid.setGridLineCount(3);
     check(render(grid) == unlabeledGrid, "disabling labels must leave the miniature unchanged");
+
+    TrafficGraph automaticGrid;
+    automaticGrid.setSize(QSizeF(288, 216));
+    automaticGrid.setSource(&source);
+    automaticGrid.setHistoryGraph(&miniature);
+    automaticGrid.setGridMode(QStringLiteral("auto"));
+    automaticGrid.setShowGridLabels(true);
+    automaticGrid.setUploadStyle(QStringLiteral("line"));
+    automaticGrid.setDownloadStyle(QStringLiteral("line"));
+    automaticGrid.setUploadColor(Qt::transparent);
+    automaticGrid.setDownloadColor(Qt::transparent);
+    automaticGrid.setUploadInverted(true);
+    automaticGrid.setDownloadInverted(true);
+    const QImage invertedAutomaticGrid = render(automaticGrid);
+    automaticGrid.setUploadInverted(false);
+    automaticGrid.setDownloadInverted(false);
+    check(render(automaticGrid) == invertedAutomaticGrid,
+          "automatic grid label order must ignore graph direction");
 
     preview.setSize(QSizeF(288, 216));
     preview.setGridMode(QStringLiteral("auto"));
