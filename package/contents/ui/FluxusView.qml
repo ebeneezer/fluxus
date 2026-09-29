@@ -8,6 +8,7 @@ import QtQuick.Layouts
 
 import "../imports/de/idoc/fluxus/backend" as FluxusBackend
 import "RateFormat.js" as RateFormat
+import "ViewGeometry.js" as ViewGeometry
 
 Item {
     id: root
@@ -15,6 +16,8 @@ Item {
     required property FluxusBackend.NetworkSource source
     required property var configuration
     property real viewScale: 1
+    property real nominalHeight: height
+    property bool hideInterfaceLabel: false
 
     // Share samples, but lay out and paint each view at its actual size.
     property FluxusBackend.TrafficGraph historyGraph: null
@@ -156,15 +159,19 @@ Item {
 
     Item {
         id: statusLine
+        objectName: "statusLine"
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        height: root.statisticsBelowLeds
-            ? Math.max(30, Math.min(42 * root.numericScale, root.height * 0.40))
-            : Math.max(14, Math.min(32 * root.numericScale, root.height * 0.19))
+        height: root.hideInterfaceLabel
+            ? ViewGeometry.compactStatusHeight(root.nominalHeight, root.numericScale,
+                                               root.statisticsBelowLeds, root.configuration.showLeds !== false)
+            : ViewGeometry.statusHeight(root.nominalHeight, root.numericScale,
+                                        root.statisticsBelowLeds)
 
         Text {
             id: interfaceLabel
+            objectName: "interfaceLabel"
             anchors.left: parent.left
             anchors.right: !root.statisticsBelowLeds && ledBank.visible ? ledBank.left : parent.right
             anchors.bottom: parent.bottom
@@ -173,7 +180,7 @@ Item {
             height: root.statisticsBelowLeds
                 ? (visible ? Math.max(8, Math.min(13, Math.floor(statusLine.height * 0.30))) : 0)
                 : statusLine.height
-            visible: root.configuration.showInterfaceName !== false
+            visible: !root.hideInterfaceLabel && root.configuration.showInterfaceName !== false
             text: String(root.configuration.sourceLabel || "").trim() || root.source.deviceName
             color: root.labelColor
             font.family: "sans-serif"
@@ -190,6 +197,7 @@ Item {
 
         Row {
             id: ledBank
+            objectName: "ledBank"
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             anchors.rightMargin: 2
@@ -209,6 +217,7 @@ Item {
 
         Row {
             id: statusStatistics
+            objectName: "statusStatistics"
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top

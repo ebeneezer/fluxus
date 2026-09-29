@@ -51,8 +51,7 @@ https://github.com/ebeneezer/fluxus
 
 https://github.com/ebeneezer/fluxus/issues
 
-## Version 0.3.4
+## Version 0.3.5
 
-- Order grid labels from smaller values at the bottom to larger values at the top, regardless of graph direction
-- Show percentages for fixed grids and throughput values for automatic grids in enlarged previews
-- Leave a small gap between each grid stroke and its label
+- Show the monitored source name only once in the enlarged preview header
+- Make the preview shorter without losing graph area, LEDs, or status readouts

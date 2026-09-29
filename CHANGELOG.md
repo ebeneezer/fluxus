@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.5 — 2026-09-29
+
+- Show the monitored source name only in the enlarged preview header and reduce the popup height accordingly.
+- Preserve the graph, activity LEDs, and status readouts when compacting the preview.
+
 ## 0.3.4 — 2026-09-29
 
 - Order fixed and automatic grid labels from smaller values at the bottom to larger values at the top, regardless of graph direction.

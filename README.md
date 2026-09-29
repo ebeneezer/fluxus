@@ -49,8 +49,8 @@ saved ID is reported as unavailable, without selecting another drive.
 
 ## Binary Release
 
-Download [Fluxus 0.3.4 for Plasma 6 / Linux x86_64](dist/fluxus-0.3.4-plasma6-linux-x86_64.tar.bz2)
-and its [SHA-256 checksum](dist/fluxus-0.3.4-plasma6-linux-x86_64.tar.bz2.sha256).
+Download [Fluxus 0.3.5 for Plasma 6 / Linux x86_64](dist/fluxus-0.3.5-plasma6-linux-x86_64.tar.bz2)
+and its [SHA-256 checksum](dist/fluxus-0.3.5-plasma6-linux-x86_64.tar.bz2.sha256).
 
 The store archive is built for:
 
@@ -148,7 +148,9 @@ identical dimensions, bounded by the available screen area. The preview shares
 the miniature's complete history, colors, directions and display settings, and
 draws the samples afresh at its actual size. Curves use the larger pixel grid;
 strokes, text and LEDs are rendered without a magnifying transform. Numeric
-readouts grow moderately with the preview size. A subtle
+readouts grow moderately with the preview size. The monitored source name appears
+once in the preview header; the popup omits the miniature's lower name label.
+A subtle
 Fluxus watermark sits behind the enlarged graph. After pressing Close, the panel
 stays available for up to 1.5 seconds while the pointer returns, then resumes its
 configured auto-hide behavior.

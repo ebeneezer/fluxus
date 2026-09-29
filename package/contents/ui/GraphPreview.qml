@@ -9,6 +9,7 @@ import QtQuick.Window
 import QtQuick.Controls as QQC2
 import org.kde.kirigami as Kirigami
 import org.kde.plasma.core as PlasmaCore
+import "ViewGeometry.js" as ViewGeometry
 
 Item {
     id: root
@@ -24,6 +25,13 @@ Item {
     readonly property bool keepPanelOpen: opened || closeGrace.running
     readonly property real miniatureWidth: miniature.width > 0 ? miniature.width : miniature.implicitWidth
     readonly property real miniatureHeight: miniature.height > 0 ? miniature.height : miniature.implicitHeight
+    readonly property int nominalViewHeight: Math.ceil(miniatureHeight * previewScale)
+    readonly property real previewNumericScale: Math.pow(Math.max(1, previewScale), 0.6)
+    readonly property bool previewStatisticsBelowLeds: configuration.showNumeric !== false
+        && (configuration.numericPlacement || "graph") === "status"
+    readonly property real previewViewHeight: ViewGeometry.compactViewHeight(
+        nominalViewHeight, previewNumericScale, previewStatisticsBelowLeds,
+        configuration.showLeds !== false)
     readonly property real previewScale: calculatePreviewScale(
         miniature.Screen.desktopAvailableWidth, miniature.Screen.desktopAvailableHeight)
 
@@ -123,7 +131,7 @@ Item {
             readonly property int padding: 8
             readonly property int headerHeight: 32
             readonly property int targetWidth: Math.ceil(root.miniatureWidth * root.previewScale) + padding * 2
-            readonly property int targetHeight: Math.ceil(root.miniatureHeight * root.previewScale) + padding * 2 + headerHeight
+            readonly property int targetHeight: Math.ceil(root.previewViewHeight) + padding * 2 + headerHeight
             width: targetWidth
             height: targetHeight
             // Plasma can resize mainItem after a window geometry event. Fixed
@@ -144,6 +152,7 @@ Item {
             }
 
             QQC2.Label {
+                objectName: "previewHeaderLabel"
                 anchors.left: parent.left
                 anchors.leftMargin: content.padding
                 anchors.right: closeButton.left
@@ -179,7 +188,9 @@ Item {
                 sourceComponent: FluxusView {
                     objectName: "previewView"
                     width: Math.ceil(root.miniatureWidth * root.previewScale)
-                    height: Math.ceil(root.miniatureHeight * root.previewScale)
+                    height: root.previewViewHeight
+                    nominalHeight: root.nominalViewHeight
+                    hideInterfaceLabel: true
                     source: root.miniature.source
                     configuration: root.configuration
                     historyGraph: root.miniature.trafficGraph

@@ -16,6 +16,10 @@ TestCase {
         id: config
         property int previewScalePercent: 300
         property int numericFontSize: 15
+        property string numericPlacement: "graph"
+        property bool showLeds: true
+        property bool showNumeric: true
+        property bool showInterfaceName: true
         property string sourceLabel: "Preview test"
     }
     NetworkSource { id: source; active: false }
@@ -38,6 +42,10 @@ TestCase {
         miniature.width = 100;
         miniature.height = 80;
         config.previewScalePercent = 300;
+        config.numericPlacement = "graph";
+        config.showLeds = true;
+        config.showNumeric = true;
+        config.showInterfaceName = true;
         preview.location = PlasmaCore.Types.Floating;
     }
 
@@ -56,7 +64,15 @@ TestCase {
         const enlarged = findChild(dialog.contentItem, "previewView");
         verify(enlarged !== null);
         compare(enlarged.width, Math.ceil(miniature.width * preview.previewScale));
-        compare(enlarged.height, Math.ceil(miniature.height * preview.previewScale));
+        compare(enlarged.height, preview.previewViewHeight);
+        verify(enlarged.height < preview.nominalViewHeight);
+        compare(Math.round(dialog.mainItem.height), Math.ceil(enlarged.height) + 48);
+        compare(miniature.hideInterfaceLabel, false);
+        compare(enlarged.hideInterfaceLabel, true);
+        compare(findChild(enlarged, "interfaceLabel").visible, false);
+        compare(findChild(dialog.contentItem, "previewHeaderLabel").text, "Preview test");
+        compare(findChild(enlarged, "statusLine").height, 11);
+        compare(findChild(enlarged, "ledBank").visible, true);
         compare(enlarged.scale, 1);
         compare(enlarged.historyGraph, miniature.trafficGraph);
         compare(miniature.trafficGraph.showGridLabels, false);
@@ -80,6 +96,26 @@ TestCase {
         mouseClick(close);
         tryCompare(preview, "opened", false);
         verify(preview.keepPanelOpen, "Close must not release the panel during the click");
+    }
+
+    function test_compactStatusPlacement() {
+        config.numericPlacement = "status";
+        preview.pin();
+        const dialog = findChild(preview, "graphPreviewDialog");
+        const enlarged = findChild(dialog.contentItem, "previewView");
+        const status = findChild(enlarged, "statusLine");
+        const statistics = findChild(enlarged, "statusStatistics");
+        compare(findChild(enlarged, "interfaceLabel").visible, false);
+        verify(enlarged.height < preview.nominalViewHeight);
+        verify(status.height > 11);
+        compare(statistics.height, status.height);
+        compare(Math.round(dialog.mainItem.height), Math.ceil(enlarged.height) + 48);
+
+        config.numericPlacement = "graph";
+        config.showLeds = false;
+        tryCompare(status, "height", 0);
+        compare(enlarged.trafficGraph.height, enlarged.height);
+        compare(Math.round(dialog.mainItem.height), Math.ceil(enlarged.height) + 48);
     }
 
     function test_unavailableGeometryKeepsPreviewSized() {
